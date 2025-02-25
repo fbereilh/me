@@ -1,2 +1,7 @@
-# portfolio_front
-This is the front end code of my portfolio site
+# Frontend code for my portfolio website
+
+## Technologies used
+
+- SvelteKit
+- TypeScript
+- Coolify
