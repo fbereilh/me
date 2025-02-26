@@ -47,10 +47,12 @@
     period: string;
     description: string;
     logoUrl?: string;
+    id: string;
   }
 
   const experiences: Experience[] = [
     {
+      id: 'exp-byratings',
       company: 'ByRatings',
       role: 'Data Scientist',
       period: '2022 - Present',
@@ -58,6 +60,7 @@
       logoUrl: 'https://logo.clearbit.com/byratings.com'
     },
     {
+      id: 'exp-itba',
       company: 'Instituto Tecnológico de Buenos Aires',
       role: 'Teaching Assistant',
       period: '2017 - 2018',
@@ -65,6 +68,7 @@
       logoUrl: 'https://logo.clearbit.com/itba.edu.ar'
     },
     {
+      id: 'exp-freelance',
       company: 'Freelance',
       role: 'Full Stack Developer',
       period: '2016 - 2018',
@@ -80,10 +84,12 @@
     period: string;
     description?: string;
     logoUrl?: string;
+    id: string;
   }
 
   const education: Education[] = [
     {
+      id: 'edu-itba',
       institution: 'Instituto Tecnológico de Buenos Aires',
       degree: 'Engineering',
       period: '2011 - 2018',
@@ -194,6 +200,57 @@
     { name: 'English', proficiency: 'Professional' },
     { name: 'Spanish', proficiency: 'Native' }
   ];
+
+  // For interactive experience and education cards
+  import { writable } from 'svelte/store';
+  import { onMount } from 'svelte';
+  
+  // Combine experiences and education for the timeline
+  const timelineItems = [...experiences, ...education];
+  
+  // Create a store for the currently selected item
+  const selectedItemId = writable(timelineItems[0]?.id || '');
+  
+  // For certifications carousel
+  let carouselContainer: HTMLElement;
+  let scrollAmount = 300;
+  let currentScrollPosition = 0;
+  let maxScroll = 0;
+  
+  onMount(() => {
+    if (carouselContainer) {
+      maxScroll = carouselContainer.scrollWidth - carouselContainer.clientWidth;
+    }
+  });
+  
+  function scrollCarousel(direction: 'left' | 'right') {
+    if (!carouselContainer) return;
+    
+    if (direction === 'left') {
+      currentScrollPosition = Math.max(0, currentScrollPosition - scrollAmount);
+    } else {
+      currentScrollPosition = Math.min(maxScroll, currentScrollPosition + scrollAmount);
+    }
+    
+    carouselContainer.scrollTo({
+      left: currentScrollPosition,
+      behavior: 'smooth'
+    });
+  }
+  
+  function openCertificateUrl(cert: Certification) {
+    if (cert.url) {
+      window.open(cert.url, '_blank');
+    }
+  }
+  
+  function getItemRole(item: typeof timelineItems[0]) {
+    return 'role' in item ? item.role : item.degree;
+  }
+  
+  function getItemCompany(item: typeof timelineItems[0]) {
+    return 'company' in item ? item.company : item.institution;
+  }
 </script>
 
 <section id="about" class="min-h-screen py-20 bg-background">
@@ -248,66 +305,84 @@
         </div>
       </div>
       
-      <!-- Experience Section -->
+      <!-- Combined Experience & Education Timeline -->
       <div class="mt-12">
-        <h3 class="text-2xl font-bold mb-6">Professional Experience</h3>
+        <h3 class="text-2xl font-bold mb-6">Professional Journey</h3>
         
-        <div class="space-y-8">
-          {#each experiences as experience}
-            <div class="flex flex-col md:flex-row gap-4 p-6 bg-card/20 backdrop-blur-sm rounded-xl border border-border/50">
-              <div class="flex-shrink-0 flex items-center justify-center w-16 h-16 bg-background rounded-lg overflow-hidden">
-                {#if experience.logoUrl}
-                  <img src={experience.logoUrl} alt={experience.company} class="w-12 h-12 object-contain" />
-                {:else}
-                  <div class="w-12 h-12 flex items-center justify-center bg-primary/10 text-primary font-bold text-xl">
-                    {experience.company.charAt(0)}
-                  </div>
-                {/if}
-              </div>
-              
-              <div class="flex-grow">
-                <h4 class="text-xl font-semibold">{experience.role}</h4>
-                <div class="flex items-center text-sm text-muted-foreground mb-2">
-                  <span class="font-medium">{experience.company}</span>
-                  <span class="mx-2">•</span>
-                  <span>{experience.period}</span>
+        <!-- Timeline Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          {#each experiences as exp}
+            <div 
+              class="p-4 bg-card/20 backdrop-blur-sm rounded-xl border border-border/50 cursor-pointer transition-all duration-200 hover:shadow-md hover:border-primary/50 hover:bg-card/30"
+              on:mouseenter={() => selectedItemId.set(exp.id)}
+              on:focus={() => selectedItemId.set(exp.id)}
+            >
+              <div class="flex items-center gap-3 mb-3">
+                <div class="flex-shrink-0 flex items-center justify-center w-12 h-12 bg-background rounded-lg overflow-hidden">
+                  {#if exp.logoUrl}
+                    <img src={exp.logoUrl} alt={exp.company} class="w-10 h-10 object-contain" />
+                  {:else}
+                    <div class="w-10 h-10 flex items-center justify-center bg-primary/10 text-primary font-bold text-lg">
+                      {exp.company.charAt(0)}
+                    </div>
+                  {/if}
                 </div>
-                <p class="text-muted-foreground">{experience.description}</p>
+                <div>
+                  <h4 class="font-semibold text-base">{exp.role}</h4>
+                  <div class="text-xs text-muted-foreground">{exp.company}</div>
+                </div>
+              </div>
+              <div class="text-xs text-muted-foreground mt-2 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <span>{exp.period}</span>
+              </div>
+            </div>
+          {/each}
+          
+          {#each education as edu}
+            <div 
+              class="p-4 bg-card/20 backdrop-blur-sm rounded-xl border border-border/50 cursor-pointer transition-all duration-200 hover:shadow-md hover:border-primary/50 hover:bg-card/30"
+              on:mouseenter={() => selectedItemId.set(edu.id)}
+              on:focus={() => selectedItemId.set(edu.id)}
+            >
+              <div class="flex items-center gap-3 mb-3">
+                <div class="flex-shrink-0 flex items-center justify-center w-12 h-12 bg-background rounded-lg overflow-hidden">
+                  {#if edu.logoUrl}
+                    <img src={edu.logoUrl} alt={edu.institution} class="w-10 h-10 object-contain" />
+                  {:else}
+                    <div class="w-10 h-10 flex items-center justify-center bg-primary/10 text-primary font-bold text-lg">
+                      {edu.institution.charAt(0)}
+                    </div>
+                  {/if}
+                </div>
+                <div>
+                  <h4 class="font-semibold text-base">{edu.degree}</h4>
+                  <div class="text-xs text-muted-foreground">{edu.institution}</div>
+                </div>
+              </div>
+              <div class="text-xs text-muted-foreground mt-2 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <span>{edu.period}</span>
               </div>
             </div>
           {/each}
         </div>
-      </div>
-
-      <!-- Education Section -->
-      <div class="mt-12">
-        <h3 class="text-2xl font-bold mb-6">Education</h3>
         
-        <div class="space-y-6">
-          {#each education as edu}
-            <div class="flex flex-col md:flex-row gap-4 p-6 bg-card/20 backdrop-blur-sm rounded-xl border border-border/50">
-              <div class="flex-shrink-0 flex items-center justify-center w-16 h-16 bg-background rounded-lg overflow-hidden">
-                {#if edu.logoUrl}
-                  <img src={edu.logoUrl} alt={edu.institution} class="w-12 h-12 object-contain" />
-                {:else}
-                  <div class="w-12 h-12 flex items-center justify-center bg-primary/10 text-primary font-bold text-xl">
-                    {edu.institution.charAt(0)}
-                  </div>
-                {/if}
+        <!-- Description Panel -->
+        <div class="mt-6 p-6 bg-card/10 backdrop-blur-sm rounded-xl border border-border/50 min-h-[100px] transition-all duration-300">
+          {#each timelineItems as item}
+            {#if $selectedItemId === item.id}
+              <div class="animate-fadeIn">
+                <h4 class="text-lg font-semibold mb-2">
+                  {getItemRole(item)} at {getItemCompany(item)}
+                </h4>
+                <p class="text-muted-foreground">{item.description}</p>
               </div>
-              
-              <div class="flex-grow">
-                <h4 class="text-xl font-semibold">{edu.degree}</h4>
-                <div class="flex items-center text-sm text-muted-foreground mb-2">
-                  <span class="font-medium">{edu.institution}</span>
-                  <span class="mx-2">•</span>
-                  <span>{edu.period}</span>
-                </div>
-                {#if edu.description}
-                  <p class="text-muted-foreground">{edu.description}</p>
-                {/if}
-              </div>
-            </div>
+            {/if}
           {/each}
         </div>
       </div>
@@ -341,41 +416,86 @@
         </div>
       </div>
       
-      <!-- Certifications -->
+      <!-- Certifications Carousel -->
       <div class="mt-12">
         <h3 class="text-2xl font-bold mb-6">Certifications</h3>
         
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {#each certifications as cert}
-            <div class="flex gap-3 p-4 bg-card/10 backdrop-blur-sm rounded-lg border border-border/30 hover:bg-card/20 transition-colors">
-              <div class="flex-shrink-0 flex items-center justify-center w-10 h-10 bg-background rounded overflow-hidden">
-                {#if cert.logoUrl}
-                  <img src={cert.logoUrl} alt={cert.issuer} class="w-8 h-8 object-contain" />
-                {:else}
-                  <div class="w-8 h-8 flex items-center justify-center bg-primary/10 text-primary font-bold text-sm">
-                    {cert.issuer.charAt(0)}
+        <div class="relative">
+          <!-- Carousel Navigation Buttons -->
+          <div class="absolute left-0 top-1/2 -translate-y-1/2 -ml-4 z-10">
+            <button 
+              class="w-10 h-10 rounded-full bg-background border border-border/50 flex items-center justify-center shadow-md hover:bg-card/30 transition-colors"
+              on:click={() => scrollCarousel('left')}
+              aria-label="Scroll left"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="15 18 9 12 15 6"></polyline>
+              </svg>
+            </button>
+          </div>
+          
+          <!-- Carousel Container -->
+          <div 
+            bind:this={carouselContainer}
+            class="carousel-container overflow-x-auto flex flex-nowrap gap-4 pb-4 hide-scrollbar"
+          >
+            {#each certifications as cert}
+              <div 
+                class="flex-shrink-0 w-[280px] p-4 bg-card/10 backdrop-blur-sm rounded-xl border border-border/30 hover:bg-card/20 transition-colors cursor-pointer" 
+                on:click={() => openCertificateUrl(cert)}
+                role="button"
+                tabindex="0"
+                on:keydown={(e) => e.key === 'Enter' && openCertificateUrl(cert)}
+                aria-label="View {cert.name} certificate"
+              >
+                <div class="flex gap-3">
+                  <div class="flex-shrink-0 flex items-center justify-center w-12 h-12 bg-background rounded-lg overflow-hidden">
+                    {#if cert.logoUrl}
+                      <img src={cert.logoUrl} alt={cert.issuer} class="w-10 h-10 object-contain" />
+                    {:else}
+                      <div class="w-10 h-10 flex items-center justify-center bg-primary/10 text-primary font-bold text-lg">
+                        {cert.issuer.charAt(0)}
+                      </div>
+                    {/if}
                   </div>
-                {/if}
-              </div>
-              
-              <div class="flex-grow">
-                <h4 class="font-medium text-base">{cert.name}</h4>
-                <div class="flex items-center text-xs text-muted-foreground">
-                  <span>{cert.issuer}</span>
-                  <span class="mx-1">•</span>
-                  <span>{cert.date}</span>
+                  
+                  <div class="flex-grow">
+                    <h4 class="font-medium text-base">{cert.name}</h4>
+                    <div class="flex items-center text-xs text-muted-foreground">
+                      <span>{cert.issuer}</span>
+                      <span class="mx-1">•</span>
+                      <span>{cert.date}</span>
+                    </div>
+                    {#if cert.credentialId}
+                      <div class="text-xs text-muted-foreground mt-1">ID: {cert.credentialId}</div>
+                    {/if}
+                    {#if cert.url}
+                      <div class="text-xs text-primary mt-2 inline-flex items-center group">
+                        <span class="group-hover:underline">View Certificate</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-1">
+                          <line x1="7" y1="17" x2="17" y2="7"></line>
+                          <polyline points="7 7 17 7 17 17"></polyline>
+                        </svg>
+                      </div>
+                    {/if}
+                  </div>
                 </div>
-                {#if cert.credentialId}
-                  <div class="text-xs text-muted-foreground mt-1">Credential ID: {cert.credentialId}</div>
-                {/if}
-                {#if cert.url}
-                  <a href={cert.url} target="_blank" rel="noopener noreferrer" class="text-xs text-primary mt-1 inline-block hover:underline">
-                    View Certificate
-                  </a>
-                {/if}
               </div>
-            </div>
-          {/each}
+            {/each}
+          </div>
+          
+          <!-- Right Navigation Button -->
+          <div class="absolute right-0 top-1/2 -translate-y-1/2 -mr-4 z-10">
+            <button 
+              class="w-10 h-10 rounded-full bg-background border border-border/50 flex items-center justify-center shadow-md hover:bg-card/30 transition-colors"
+              on:click={() => scrollCarousel('right')}
+              aria-label="Scroll right"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="9 18 15 12 9 6"></polyline>
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
       
@@ -457,4 +577,30 @@
       </div>
     </div>
   </div>
-</section> 
+</section>
+
+<style>
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  
+  .animate-fadeIn {
+    animation: fadeIn 0.3s ease-in-out;
+  }
+  
+  /* Hide scrollbar for carousel */
+  .hide-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+  
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;  /* Chrome, Safari and Opera */
+  }
+  
+  .carousel-container {
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+  }
+</style> 
