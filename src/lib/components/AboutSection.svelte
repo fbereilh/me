@@ -67,6 +67,32 @@
             <p>Freelance & Full-time</p>
           </div>
         </div>
+
+        <div class="bg-card/20 backdrop-blur-sm rounded-xl p-6 border border-border/50">
+            <h3 class="text-xl font-semibold mb-3">Data-Driven Insights</h3>
+            <p class="text-muted-foreground mb-4">
+              Specializing in statistical analysis, machine learning, and data visualization 
+              to extract meaningful patterns and actionable insights from complex datasets.
+            </p>
+            <div class="grid grid-cols-2 gap-3 text-sm">
+              <div class="bg-background/30 p-3 rounded-lg">
+                <div class="font-medium mb-1">Statistical Modeling</div>
+                <div class="text-xs text-muted-foreground">Regression, classification, time series analysis</div>
+              </div>
+              <div class="bg-background/30 p-3 rounded-lg">
+                <div class="font-medium mb-1">Machine Learning</div>
+                <div class="text-xs text-muted-foreground">Supervised/unsupervised learning, deep learning</div>
+              </div>
+              <div class="bg-background/30 p-3 rounded-lg">
+                <div class="font-medium mb-1">Data Visualization</div>
+                <div class="text-xs text-muted-foreground">Interactive dashboards, custom visualizations</div>
+              </div>
+              <div class="bg-background/30 p-3 rounded-lg">
+                <div class="font-medium mb-1">Big Data Processing</div>
+                <div class="text-xs text-muted-foreground">Distributed computing, real-time analytics</div>
+              </div>
+            </div>
+          </div>
       </div>
       
       <!-- Skills -->

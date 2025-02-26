@@ -83,7 +83,7 @@
 				class="mr-6 flex items-center space-x-2"
 				on:click={(e) => scrollToSection(e, 'home')}
 			>
-				<span class="font-bold text-4xl" style="font-family: 'Shadows Into Light', cursive;">FV</span>
+				<span class="font-bold text-4xl" style="font-family: 'Shadows Into Light', cursive;">FB</span>
 			</a>
 		</div>
 		<div class="flex flex-1 items-center justify-between space-x-2 md:justify-end">

@@ -7,7 +7,7 @@
       <!-- Left side - Text content -->
       <div class="space-y-6 text-center">
         <h1 class="text-4xl md:text-6xl font-bold tracking-tighter">
-          Felipe Vallejo
+          Felipe Bereilh
         </h1>
         <p class="text-xl md:text-2xl text-muted-foreground">
           Full Stack Developer & Problem Solver

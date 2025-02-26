@@ -7,19 +7,12 @@
     <div class="flex flex-col md:flex-row justify-between items-center gap-6">
       <!-- Logo and Copyright -->
       <div class="flex flex-col md:flex-row items-center gap-4">
-        <span class="font-bold text-2xl" style="font-family: 'Shadows Into Light', cursive;">FV</span>
+        <span class="font-bold text-2xl" style="font-family: 'Shadows Into Light', cursive;">FB</span>
         <span class="text-muted-foreground text-sm">
-          © {currentYear} Felipe Vallejo. All rights reserved.
+          © {currentYear} Felipe Bereilh. All rights reserved.
         </span>
       </div>
       
-      <!-- Links -->
-      <nav class="flex gap-6">
-        <a href="/" class="text-sm text-muted-foreground hover:text-primary transition-colors">Home</a>
-        <a href="#about" class="text-sm text-muted-foreground hover:text-primary transition-colors">About</a>
-        <a href="#projects" class="text-sm text-muted-foreground hover:text-primary transition-colors">Projects</a>
-        <a href="#contact" class="text-sm text-muted-foreground hover:text-primary transition-colors">Contact</a>
-      </nav>
       
       <!-- Social Links -->
       <div class="flex gap-4">
