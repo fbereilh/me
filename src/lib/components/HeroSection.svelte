@@ -1,7 +1,7 @@
 <script lang="ts">
 </script>
 
-<section class="relative min-h-screen flex items-center bg-background overflow-hidden">
+<section id="home" class="relative min-h-screen flex items-center bg-background overflow-hidden">
   <div class="container mx-auto pb-48">
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
       <!-- Left side - Text content -->
