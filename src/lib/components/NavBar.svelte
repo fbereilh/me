@@ -5,6 +5,19 @@
 	// Track active section
 	let activeSection = 'home';
 	
+	// Theme toggle functionality
+	let isDarkTheme = true; // Default to dark theme
+	
+	function toggleTheme() {
+		isDarkTheme = !isDarkTheme;
+		if (isDarkTheme) {
+			document.documentElement.classList.remove('light');
+		} else {
+			document.documentElement.classList.add('light');
+		}
+		localStorage.setItem('theme', isDarkTheme ? 'dark' : 'light');
+	}
+	
 	// Handle smooth scrolling
 	function scrollToSection(event: MouseEvent, id: string) {
 		event.preventDefault();
@@ -36,6 +49,15 @@
 	}
 	
 	onMount(() => {
+		// Set initial theme from localStorage or default to dark
+		const savedTheme = localStorage.getItem('theme') || 'dark';
+		isDarkTheme = savedTheme === 'dark';
+		if (!isDarkTheme) {
+			document.documentElement.classList.add('light');
+		} else {
+			document.documentElement.classList.remove('light');
+		}
+		
 		// Add scroll event listener with throttling
 		let ticking = false;
 		window.addEventListener('scroll', () => {
@@ -94,6 +116,33 @@
 				>
 					Contact
 				</a>
+				
+				<!-- Theme Toggle Button -->
+				<button 
+					aria-label="Toggle theme"
+					class="p-2 rounded-md text-muted-foreground hover:text-primary"
+					on:click={toggleTheme}
+				>
+					{#if isDarkTheme}
+						<!-- Sun icon for dark mode -->
+						<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<circle cx="12" cy="12" r="4"></circle>
+							<path d="M12 2v2"></path>
+							<path d="M12 20v2"></path>
+							<path d="m4.93 4.93 1.41 1.41"></path>
+							<path d="m17.66 17.66 1.41 1.41"></path>
+							<path d="M2 12h2"></path>
+							<path d="M20 12h2"></path>
+							<path d="m6.34 17.66-1.41 1.41"></path>
+							<path d="m19.07 4.93-1.41 1.41"></path>
+						</svg>
+					{:else}
+						<!-- Moon icon for light mode -->
+						<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+						</svg>
+					{/if}
+				</button>
 			</nav>
 		</div>
 	</div>
