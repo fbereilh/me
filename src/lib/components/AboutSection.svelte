@@ -40,61 +40,86 @@
     { name: 'Data Visualization', level: 9 }
   ];
 
-  // Experience data
-  interface Experience {
-    company: string;
-    role: string;
+  // Timeline item interface for both experiences and education
+  interface TimelineItem {
+    id: string;
+    type: 'job' | 'education';
+    title: string;
+    organization: string;
     period: string;
     description: string;
     logoUrl?: string;
-    id: string;
+    timeAllocation?: {
+      name: string;
+      percentage: number;
+      color: string;
+    }[];
+    tools?: string[];
   }
 
-  const experiences: Experience[] = [
+  // Timeline
+  const timelineItems: TimelineItem[] = [
     {
       id: 'exp-byratings',
-      company: 'ByRatings',
-      role: 'Data Scientist',
+      type: 'job',
+      title: 'Data Scientist',
+      organization: 'ByRatings',
       period: '2022 - Present',
       description: 'Pioneering the integration of machine learning models for data analysis and insights. Developing advanced analytics solutions for business intelligence and decision-making processes.',
-      logoUrl: 'https://logo.clearbit.com/byratings.com'
+      logoUrl: 'https://logo.clearbit.com/byratings.com',
+      timeAllocation: [
+        { name: 'Machine Learning', percentage: 40, color: 'bg-blue-500' },
+        { name: 'Data Analysis', percentage: 30, color: 'bg-green-500' },
+        { name: 'Development', percentage: 20, color: 'bg-purple-500' },
+        { name: 'Research', percentage: 10, color: 'bg-amber-500' }
+      ],
+      tools: ['Python', 'TensorFlow', 'PyTorch', 'SQL', 'Pandas', 'Docker']
     },
     {
       id: 'exp-itba',
-      company: 'Instituto Tecnológico de Buenos Aires',
-      role: 'Teaching Assistant',
+      type: 'job',
+      title: 'Teaching Assistant',
+      organization: 'Instituto Tecnológico de Buenos Aires',
       period: '2017 - 2018',
       description: 'Assisted in teaching programming and algorithms courses to engineering students. Provided guidance on practical assignments and evaluated student performance.',
-      logoUrl: 'https://logo.clearbit.com/itba.edu.ar'
+      logoUrl: 'https://logo.clearbit.com/itba.edu.ar',
+      timeAllocation: [
+        { name: 'Teaching', percentage: 60, color: 'bg-blue-500' },
+        { name: 'Grading', percentage: 20, color: 'bg-green-500' },
+        { name: 'Preparation', percentage: 20, color: 'bg-purple-500' }
+      ],
+      tools: ['Java', 'C++', 'Algorithms', 'Data Structures']
     },
     {
       id: 'exp-freelance',
-      company: 'Freelance',
-      role: 'Full Stack Developer',
+      type: 'job',
+      title: 'Full Stack Developer',
+      organization: 'Freelance',
       period: '2016 - 2018',
       description: 'Developed web applications and data solutions for various clients. Implemented responsive designs, RESTful APIs, and database architectures to meet client requirements.',
-      logoUrl: ''
-    }
-  ];
-
-  // Education data
-  interface Education {
-    institution: string;
-    degree: string;
-    period: string;
-    description?: string;
-    logoUrl?: string;
-    id: string;
-  }
-
-  const education: Education[] = [
+      logoUrl: '',
+      timeAllocation: [
+        { name: 'Frontend', percentage: 40, color: 'bg-blue-500' },
+        { name: 'Backend', percentage: 40, color: 'bg-green-500' },
+        { name: 'DevOps', percentage: 10, color: 'bg-purple-500' },
+        { name: 'Client Management', percentage: 10, color: 'bg-amber-500' }
+      ],
+      tools: ['JavaScript', 'React', 'Node.js', 'Express', 'MongoDB', 'CSS3']
+    },
     {
       id: 'edu-itba',
-      institution: 'Instituto Tecnológico de Buenos Aires',
-      degree: 'Engineering',
+      type: 'education',
+      title: 'Engineering',
+      organization: 'Instituto Tecnológico de Buenos Aires',
       period: '2011 - 2018',
       description: 'Specialized in computer science and data engineering with focus on algorithms and machine learning applications.',
-      logoUrl: 'https://logo.clearbit.com/itba.edu.ar'
+      logoUrl: 'https://logo.clearbit.com/itba.edu.ar',
+      timeAllocation: [
+        { name: 'Coursework', percentage: 60, color: 'bg-blue-500' },
+        { name: 'Projects', percentage: 25, color: 'bg-green-500' },
+        { name: 'Research', percentage: 15, color: 'bg-purple-500' }
+      ],
+      tools: ['Java', 'Python', 'MATLAB', 'Machine Learning', 'Statistics']
     }
   ];
 
@@ -190,23 +215,10 @@
     }
   ];
 
-  // Languages
-  interface Language {
-    name: string;
-    proficiency: string;
-  }
-
-  const languages: Language[] = [
-    { name: 'English', proficiency: 'Professional' },
-    { name: 'Spanish', proficiency: 'Native' }
-  ];
 
   // For interactive experience and education cards
   import { writable } from 'svelte/store';
   import { onMount } from 'svelte';
-  
-  // Combine experiences and education for the timeline
-  const timelineItems = [...experiences, ...education];
   
   // Create a store for the currently selected item
   const selectedItemId = writable(timelineItems[0]?.id || '');
@@ -243,14 +255,6 @@
       window.open(cert.url, '_blank');
     }
   }
-  
-  function getItemRole(item: typeof timelineItems[0]) {
-    return 'role' in item ? item.role : item.degree;
-  }
-  
-  function getItemCompany(item: typeof timelineItems[0]) {
-    return 'company' in item ? item.company : item.institution;
-  }
 </script>
 
 <section id="about" class="min-h-screen py-20 bg-background">
@@ -269,15 +273,7 @@
               application development.
             </p>
             
-            <div class="flex items-center mt-4">
-              <a href="https://www.linkedin.com/in/felipebereilh/" target="_blank" rel="noopener noreferrer" 
-                 class="flex items-center gap-2 px-4 py-2 bg-[#0077B5]/10 text-[#0077B5] rounded-lg hover:bg-[#0077B5]/20 transition-colors">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
-                </svg>
-                <span>LinkedIn Profile</span>
-              </a>
-            </div>
+
           </div>
         </div>
         
@@ -289,9 +285,8 @@
           <div>
             <h3 class="text-xl font-semibold mb-2">Languages</h3>
             <div class="space-y-1">
-              {#each languages as language}
-                <p>{language.name} ({language.proficiency})</p>
-              {/each}
+                <p>English </p>
+                <p>Spanish</p>
             </div>
           </div>
           <div>
@@ -311,76 +306,96 @@
         
         <!-- Timeline Cards -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-          {#each experiences as exp}
+          {#each timelineItems as item}
             <div 
-              class="p-4 bg-card/20 backdrop-blur-sm rounded-xl border border-border/50 cursor-pointer transition-all duration-200 hover:shadow-md hover:border-primary/50 hover:bg-card/30"
-              on:mouseenter={() => selectedItemId.set(exp.id)}
-              on:focus={() => selectedItemId.set(exp.id)}
+              class="p-4 bg-card/20 backdrop-blur-sm rounded-xl border {$selectedItemId === item.id ? 'border-primary shadow-md bg-card/40' : 'border-border/50'} cursor-pointer transition-all duration-200 hover:shadow-md hover:border-primary/50 hover:bg-card/30"
+              on:mouseenter={() => selectedItemId.set(item.id)}
+              on:focus={() => selectedItemId.set(item.id)}
+              on:keydown={(e) => e.key === 'Enter' && selectedItemId.set(item.id)}
+              role="button"
+              tabindex="0"
+              aria-label="View details for {item.title} at {item.organization}"
             >
               <div class="flex items-center gap-3 mb-3">
                 <div class="flex-shrink-0 flex items-center justify-center w-12 h-12 bg-background rounded-lg overflow-hidden">
-                  {#if exp.logoUrl}
-                    <img src={exp.logoUrl} alt={exp.company} class="w-10 h-10 object-contain" />
+                  {#if item.logoUrl}
+                    <img src={item.logoUrl} alt={item.organization} class="w-10 h-10 object-contain" />
                   {:else}
                     <div class="w-10 h-10 flex items-center justify-center bg-primary/10 text-primary font-bold text-lg">
-                      {exp.company.charAt(0)}
+                      {item.organization.charAt(0)}
                     </div>
                   {/if}
                 </div>
                 <div>
-                  <h4 class="font-semibold text-base">{exp.role}</h4>
-                  <div class="text-xs text-muted-foreground">{exp.company}</div>
+                  <h4 class="font-semibold text-base {$selectedItemId === item.id ? 'text-primary' : ''}">{item.title}</h4>
+                  <div class="text-xs text-muted-foreground">{item.organization}</div>
                 </div>
               </div>
               <div class="text-xs text-muted-foreground mt-2 flex items-center">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
-                <span>{exp.period}</span>
+                <span>{item.period}</span>
               </div>
-            </div>
-          {/each}
-          
-          {#each education as edu}
-            <div 
-              class="p-4 bg-card/20 backdrop-blur-sm rounded-xl border border-border/50 cursor-pointer transition-all duration-200 hover:shadow-md hover:border-primary/50 hover:bg-card/30"
-              on:mouseenter={() => selectedItemId.set(edu.id)}
-              on:focus={() => selectedItemId.set(edu.id)}
-            >
-              <div class="flex items-center gap-3 mb-3">
-                <div class="flex-shrink-0 flex items-center justify-center w-12 h-12 bg-background rounded-lg overflow-hidden">
-                  {#if edu.logoUrl}
-                    <img src={edu.logoUrl} alt={edu.institution} class="w-10 h-10 object-contain" />
-                  {:else}
-                    <div class="w-10 h-10 flex items-center justify-center bg-primary/10 text-primary font-bold text-lg">
-                      {edu.institution.charAt(0)}
-                    </div>
-                  {/if}
-                </div>
-                <div>
-                  <h4 class="font-semibold text-base">{edu.degree}</h4>
-                  <div class="text-xs text-muted-foreground">{edu.institution}</div>
-                </div>
-              </div>
-              <div class="text-xs text-muted-foreground mt-2 flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-                <span>{edu.period}</span>
+              <!-- Indicator for card type -->
+              <div class="mt-2 flex justify-end">
+                <span class="text-xs px-2 py-0.5 rounded-full {item.type === 'job' ? 'bg-blue-500/10 text-blue-600' : 'bg-amber-500/10 text-amber-600'}">
+                  {item.type === 'job' ? 'Experience' : 'Education'}
+                </span>
               </div>
             </div>
           {/each}
         </div>
         
-        <!-- Description Panel -->
-        <div class="mt-6 p-6 bg-card/10 backdrop-blur-sm rounded-xl border border-border/50 min-h-[100px] transition-all duration-300">
+        <!-- Description Panel with Time Allocation Bar -->
+        <div class="mt-6 p-6 bg-card/10 backdrop-blur-sm rounded-xl border border-border/50 h-[320px] overflow-y-auto transition-all duration-300">
           {#each timelineItems as item}
             {#if $selectedItemId === item.id}
-              <div class="animate-fadeIn">
+              <div class="animate-fadeIn space-y-4">
                 <h4 class="text-lg font-semibold mb-2">
-                  {getItemRole(item)} at {getItemCompany(item)}
+                  {item.title} at {item.organization}
                 </h4>
-                <p class="text-muted-foreground">{item.description}</p>
+                <p class="text-muted-foreground mb-4 line-clamp-3 leading-6 min-h-[4.5rem]">{item.description}</p>
+                
+                <!-- Time Allocation Bar -->
+                {#if item.timeAllocation && item.timeAllocation.length > 0}
+                  <div class="mt-2">
+                    <h5 class="text-sm font-medium mb-2">Time Allocation</h5>
+                    
+                    <!-- Clean horizontal bar visualization -->
+                    <div class="space-y-4">
+                      <div class="h-8 w-full rounded-md overflow-hidden flex">
+                        {#each item.timeAllocation as allocation}
+                          <div 
+                            class="h-full {allocation.color} flex items-center justify-center" 
+                            style="width: {allocation.percentage}%"
+                            title="{allocation.name}: {allocation.percentage}%"
+                          >
+                            {#if allocation.percentage >= 15}
+                              <span class="text-xs text-white font-medium px-1 truncate drop-shadow-md">
+                                {allocation.name}
+                              </span>
+                            {/if}
+                          </div>
+                        {/each}
+                      </div>
+                    </div>
+                  </div>
+                {/if}
+                
+                <!-- Tools Used Badges -->
+                {#if item.tools && item.tools.length > 0}
+                  <div class="mt-4">
+                    <h5 class="text-sm font-medium mb-2">Tools Used</h5>
+                    <div class="flex flex-wrap gap-2">
+                      {#each item.tools as tool}
+                        <span class="px-3 py-1 rounded-full bg-primary/10 text-primary text-xs">
+                          {tool}
+                        </span>
+                      {/each}
+                    </div>
+                  </div>
+                {/if}
               </div>
             {/if}
           {/each}
@@ -602,5 +617,11 @@
   .carousel-container {
     scroll-behavior: smooth;
     -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Extra small text for compact legends */
+  .text-2xs {
+    font-size: 0.65rem;
+    line-height: 1rem;
   }
 </style> 
