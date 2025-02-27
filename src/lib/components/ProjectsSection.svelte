@@ -10,6 +10,53 @@
     github?: string;
   }
 
+  // Custom action for tilt effect
+  function tilt(node: HTMLElement) {
+    const handleMouseMove = (event: MouseEvent) => {
+      const rect = node.getBoundingClientRect();
+      
+      // Calculate mouse position relative to the card (from -1 to 1)
+      const x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+      const y = ((event.clientY - rect.top) / rect.height) * 2 - 1;
+      
+      // Apply the transform with more pronounced effect
+      requestAnimationFrame(() => {
+        node.style.transform = `perspective(1000px) rotateX(${-y * 10}deg) rotateY(${x * 10}deg) scale3d(1.05, 1.05, 1.05)`;
+      });
+    };
+    
+    const handleMouseEnter = () => {
+      // Ensure proper initial state when mouse enters
+      node.style.transition = 'transform 0.2s ease-out';
+      node.style.transformStyle = 'preserve-3d';
+    };
+    
+    const handleMouseLeave = () => {
+      // Reset transform when mouse leaves
+      node.style.transition = 'transform 0.5s ease';
+      node.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale3d(1, 1, 1)';
+    };
+    
+    // Set initial styles
+    node.style.willChange = 'transform';
+    node.style.transformStyle = 'preserve-3d';
+    node.style.transform = 'perspective(1000px) rotateX(0) rotateY(0)';
+    
+    // Add event listeners
+    node.addEventListener('mouseenter', handleMouseEnter);
+    node.addEventListener('mousemove', handleMouseMove);
+    node.addEventListener('mouseleave', handleMouseLeave);
+    
+    return {
+      destroy() {
+        // Clean up event listeners on component destruction
+        node.removeEventListener('mouseenter', handleMouseEnter);
+        node.removeEventListener('mousemove', handleMouseMove);
+        node.removeEventListener('mouseleave', handleMouseLeave);
+      }
+    };
+  }
+
   const projects: Project[] = [
     {
       title: "Project 1",
@@ -75,7 +122,11 @@
     
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {#each projects as project}
-        <div class="group relative bg-card rounded-xl overflow-hidden border border-border hover:border-primary/50 transition-all duration-300">
+        <div 
+          class="group relative bg-card rounded-xl overflow-hidden border border-border hover:border-primary/50 transition-colors duration-300"
+          use:tilt
+          style="position: relative; transform-style: preserve-3d;"
+        >
           <!-- Image -->
           <div class="relative aspect-video overflow-hidden">
             <img
