@@ -77,7 +77,7 @@
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {#each projects as project}
         <TiltCard>
-          <div class="group relative bg-card rounded-xl overflow-hidden border border-border hover:border-primary/50 transition-colors duration-300">
+          <div class="group relative bg-card rounded-xl overflow-hidden border border-border hover:border-primary/50 transition-colors duration-300 h-full flex flex-col">
             <!-- Image -->
             <div class="relative aspect-video overflow-hidden">
               <img
@@ -88,9 +88,9 @@
             </div>
 
             <!-- Content -->
-            <div class="p-6 space-y-4">
+            <div class="p-6 space-y-4 flex flex-col flex-grow">
               <h3 class="text-xl font-bold">{project.title}</h3>
-              <p class="text-muted-foreground text-sm line-clamp-3">{project.description}</p>
+              <p class="text-muted-foreground text-sm line-clamp-3 flex-grow">{project.description}</p>
 
               <!-- Technologies -->
               <div class="flex flex-wrap gap-2">
@@ -102,7 +102,7 @@
               </div>
 
               <!-- Links -->
-              <div class="flex gap-3 pt-2">
+              <div class="flex gap-3 pt-2 mt-auto">
                 <a
                   href={project.link}
                   target="_blank"

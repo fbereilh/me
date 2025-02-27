@@ -223,38 +223,8 @@
   // Create a store for the currently selected item
   const selectedItemId = writable(timelineItems[0]?.id || '');
   
-  // For certifications carousel
-  let carouselContainer: HTMLElement;
-  let scrollAmount = 300;
-  let currentScrollPosition = 0;
-  let maxScroll = 0;
-  
-  function scrollCarousel(direction: 'left' | 'right') {
-    if (!carouselContainer) return;
-    
-    if (direction === 'left') {
-      currentScrollPosition = Math.max(0, currentScrollPosition - scrollAmount);
-    } else {
-      currentScrollPosition = Math.min(maxScroll, currentScrollPosition + scrollAmount);
-    }
-    
-    carouselContainer.scrollTo({
-      left: currentScrollPosition,
-      behavior: 'smooth'
-    });
-  }
-  
-  function openCertificateUrl(cert: Certification) {
-    if (cert.url) {
-      window.open(cert.url, '_blank');
-    }
-  }
 
-  onMount(() => {
-    if (carouselContainer) {
-      maxScroll = carouselContainer.scrollWidth - carouselContainer.clientWidth;
-    }
-  });
+
 </script>
 
 <section id="about" class="min-h-screen py-16 bg-background">
@@ -278,16 +248,16 @@
       
       <!-- Combined Experience & Education Timeline -->
       <div class="mt-6">
-        <h3 class="text-2xl font-bold mb-4">Professional Journey</h3>
+        <h3 class="text-2xl font-bold mb-4">Experience</h3>
         
         <!-- Timeline with side-by-side layout -->
         <div class="flex flex-col md:flex-row gap-4">
           <!-- Timeline Cards (stacked in column) -->
-          <div class="md:w-1/3 space-y-2">
+          <div class="md:w-1/3 space-y-3">
             {#each timelineItems as item}
               <TiltCard>
                 <div 
-                  class="p-3 bg-card/20 backdrop-blur-sm rounded-xl border {$selectedItemId === item.id ? 'border-primary shadow-md bg-card/40' : 'border-border/50'} cursor-pointer transition-all duration-200 hover:shadow-md hover:border-primary/50 hover:bg-card/30"
+                  class="p-4 bg-card/20 backdrop-blur-sm rounded-xl border {$selectedItemId === item.id ? 'border-primary shadow-md bg-card/40' : 'border-border/50'} cursor-pointer transition-all duration-200 hover:shadow-md hover:border-primary/50 hover:bg-card/30"
                   on:mouseenter={() => selectedItemId.set(item.id)}
                   on:focus={() => selectedItemId.set(item.id)}
                   on:keydown={(e) => e.key === 'Enter' && selectedItemId.set(item.id)}
@@ -295,19 +265,19 @@
                   tabindex="0"
                   aria-label="View details for {item.title} at {item.organization}"
                 >
-                  <div class="flex items-center gap-3">
-                    <div class="flex-shrink-0 flex items-center justify-center w-10 h-10 bg-background rounded-lg overflow-hidden">
+                  <div class="flex items-center gap-4">
+                    <div class="flex-shrink-0 flex items-center justify-center w-12 h-12 bg-background rounded-lg overflow-hidden">
                       {#if item.logoUrl}
-                        <img src={item.logoUrl} alt={item.organization} class="w-8 h-8 object-contain" />
+                        <img src={item.logoUrl} alt={item.organization} class="w-10 h-10 object-contain" />
                       {:else}
-                        <div class="w-8 h-8 flex items-center justify-center bg-primary/10 text-primary font-bold text-base">
+                        <div class="w-10 h-10 flex items-center justify-center bg-primary/10 text-primary font-bold text-lg">
                           {item.organization.charAt(0)}
                         </div>
                       {/if}
                     </div>
                     <div>
-                      <h4 class="font-semibold text-sm {$selectedItemId === item.id ? 'text-primary' : ''}">{item.title}</h4>
-                      <div class="text-xs text-muted-foreground">{item.organization}</div>
+                      <h4 class="font-semibold text-base {$selectedItemId === item.id ? 'text-primary' : ''}">{item.title}</h4>
+                      <div class="text-sm text-muted-foreground">{item.organization}</div>
                     </div>
                   </div>
                 </div>
@@ -354,7 +324,6 @@
                   <!-- Tools Used Badges -->
                   {#if item.tools && item.tools.length > 0}
                     <div class="mt-4">
-                      <h5 class="text-sm font-medium mb-2">Tools Used</h5>
                       <div class="flex flex-wrap gap-1.5">
                         {#each item.tools as tool}
                           <span class="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs">
@@ -370,85 +339,6 @@
           </div>
         </div>
       </div>
-
-      <!-- Certifications Carousel -->
-      <div class="mt-8">
-        <h3 class="text-2xl font-bold mb-4">Certifications</h3>
-        
-        <div class="relative">
-          <!-- Carousel Navigation Buttons -->
-          <div class="absolute left-0 top-1/2 -translate-y-1/2 -ml-4 z-10">
-            <button 
-              class="w-10 h-10 rounded-full bg-background border border-border/50 flex items-center justify-center shadow-md hover:bg-card/30 transition-colors"
-              on:click={() => scrollCarousel('left')}
-              aria-label="Scroll left"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="15 18 9 12 15 6"></polyline>
-              </svg>
-            </button>
-          </div>
-          
-          <!-- Carousel Container -->
-          <div 
-            bind:this={carouselContainer}
-            class="carousel-container overflow-x-auto flex flex-nowrap gap-4 pb-4 hide-scrollbar"
-          >
-            {#each certifications as cert}
-              <div 
-                class="flex-shrink-0 w-[250px] p-3 bg-card/10 backdrop-blur-sm rounded-xl border border-border/30 hover:bg-card/20 transition-colors cursor-pointer" 
-                on:click={() => openCertificateUrl(cert)}
-                role="button"
-                tabindex="0"
-                on:keydown={(e) => e.key === 'Enter' && openCertificateUrl(cert)}
-                aria-label="View {cert.name} certificate"
-              >
-                <div class="flex gap-3">
-                  <div class="flex-shrink-0 flex items-center justify-center w-10 h-10 bg-background rounded-lg overflow-hidden">
-                    {#if cert.logoUrl}
-                      <img src={cert.logoUrl} alt={cert.issuer} class="w-8 h-8 object-contain" />
-                    {:else}
-                      <div class="w-8 h-8 flex items-center justify-center bg-primary/10 text-primary font-bold text-base">
-                        {cert.issuer.charAt(0)}
-                      </div>
-                    {/if}
-                  </div>
-                  
-                  <div class="flex-grow">
-                    <h4 class="font-medium text-sm">{cert.name}</h4>
-                    <div class="text-xs text-muted-foreground">
-                      {cert.issuer}
-                    </div>
-                    {#if cert.url}
-                      <div class="text-xs text-primary mt-1 inline-flex items-center group">
-                        <span class="group-hover:underline">View</span>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-1">
-                          <line x1="7" y1="17" x2="17" y2="7"></line>
-                          <polyline points="7 7 17 7 17 17"></polyline>
-                        </svg>
-                      </div>
-                    {/if}
-                  </div>
-                </div>
-              </div>
-            {/each}
-          </div>
-          
-          <!-- Right Navigation Button -->
-          <div class="absolute right-0 top-1/2 -translate-y-1/2 -mr-4 z-10">
-            <button 
-              class="w-10 h-10 rounded-full bg-background border border-border/50 flex items-center justify-center shadow-md hover:bg-card/30 transition-colors"
-              on:click={() => scrollCarousel('right')}
-              aria-label="Scroll right"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="9 18 15 12 9 6"></polyline>
-              </svg>
-            </button>
-          </div>
-        </div>
-      </div>
-      
 
       <!-- Download CV Button -->
       <div class="mt-8 flex justify-center">
