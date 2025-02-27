@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import TiltCard from '$lib/components/ui/tilt/TiltCard.svelte';
 
   interface Project {
     title: string;
@@ -8,53 +9,6 @@
     technologies: string[];
     link: string;
     github?: string;
-  }
-
-  // Custom action for tilt effect
-  function tilt(node: HTMLElement) {
-    const handleMouseMove = (event: MouseEvent) => {
-      const rect = node.getBoundingClientRect();
-      
-      // Calculate mouse position relative to the card (from -1 to 1)
-      const x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-      const y = ((event.clientY - rect.top) / rect.height) * 2 - 1;
-      
-      // Apply the transform with more pronounced effect
-      requestAnimationFrame(() => {
-        node.style.transform = `perspective(1000px) rotateX(${-y * 10}deg) rotateY(${x * 10}deg) scale3d(1.05, 1.05, 1.05)`;
-      });
-    };
-    
-    const handleMouseEnter = () => {
-      // Ensure proper initial state when mouse enters
-      node.style.transition = 'transform 0.2s ease-out';
-      node.style.transformStyle = 'preserve-3d';
-    };
-    
-    const handleMouseLeave = () => {
-      // Reset transform when mouse leaves
-      node.style.transition = 'transform 0.5s ease';
-      node.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale3d(1, 1, 1)';
-    };
-    
-    // Set initial styles
-    node.style.willChange = 'transform';
-    node.style.transformStyle = 'preserve-3d';
-    node.style.transform = 'perspective(1000px) rotateX(0) rotateY(0)';
-    
-    // Add event listeners
-    node.addEventListener('mouseenter', handleMouseEnter);
-    node.addEventListener('mousemove', handleMouseMove);
-    node.addEventListener('mouseleave', handleMouseLeave);
-    
-    return {
-      destroy() {
-        // Clean up event listeners on component destruction
-        node.removeEventListener('mouseenter', handleMouseEnter);
-        node.removeEventListener('mousemove', handleMouseMove);
-        node.removeEventListener('mouseleave', handleMouseLeave);
-      }
-    };
   }
 
   const projects: Project[] = [
@@ -122,61 +76,59 @@
     
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {#each projects as project}
-        <div 
-          class="group relative bg-card rounded-xl overflow-hidden border border-border hover:border-primary/50 transition-colors duration-300"
-          use:tilt
-          style="position: relative; transform-style: preserve-3d;"
-        >
-          <!-- Image -->
-          <div class="relative aspect-video overflow-hidden">
-            <img
-              src={project.image}
-              alt={project.title}
-              class="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300"
-            />
-          </div>
-
-          <!-- Content -->
-          <div class="p-6 space-y-4">
-            <h3 class="text-xl font-bold">{project.title}</h3>
-            <p class="text-muted-foreground text-sm line-clamp-3">{project.description}</p>
-
-            <!-- Technologies -->
-            <div class="flex flex-wrap gap-2">
-              {#each project.technologies as tech}
-                <span class="px-2 py-1 rounded-full bg-primary/10 text-primary text-xs">
-                  {tech}
-                </span>
-              {/each}
+        <TiltCard>
+          <div class="group relative bg-card rounded-xl overflow-hidden border border-border hover:border-primary/50 transition-colors duration-300">
+            <!-- Image -->
+            <div class="relative aspect-video overflow-hidden">
+              <img
+                src={project.image}
+                alt={project.title}
+                class="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300"
+              />
             </div>
 
-            <!-- Links -->
-            <div class="flex gap-3 pt-2">
-              <a
-                href={project.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                class="inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground ring-offset-background transition-colors hover:bg-primary/90 flex-1"
-              >
-                View Project
-              </a>
-              {#if project.github}
+            <!-- Content -->
+            <div class="p-6 space-y-4">
+              <h3 class="text-xl font-bold">{project.title}</h3>
+              <p class="text-muted-foreground text-sm line-clamp-3">{project.description}</p>
+
+              <!-- Technologies -->
+              <div class="flex flex-wrap gap-2">
+                {#each project.technologies as tech}
+                  <span class="px-2 py-1 rounded-full bg-primary/10 text-primary text-xs">
+                    {tech}
+                  </span>
+                {/each}
+              </div>
+
+              <!-- Links -->
+              <div class="flex gap-3 pt-2">
                 <a
-                  href={project.github}
+                  href={project.link}
                   target="_blank"
                   rel="noopener noreferrer"
-                  aria-label="View project on GitHub"
-                  class="inline-flex h-9 items-center justify-center rounded-md border border-input hover:bg-accent hover:text-accent-foreground px-4"
+                  class="inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground ring-offset-background transition-colors hover:bg-primary/90 flex-1"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-github">
-                    <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/>
-                    <path d="M9 18c-4.51 2-5-2-7-2"/>
-                  </svg>
+                  View Project
                 </a>
-              {/if}
+                {#if project.github}
+                  <a
+                    href={project.github}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="View project on GitHub"
+                    class="inline-flex h-9 items-center justify-center rounded-md border border-input hover:bg-accent hover:text-accent-foreground px-4"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-github">
+                      <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/>
+                      <path d="M9 18c-4.51 2-5-2-7-2"/>
+                    </svg>
+                  </a>
+                {/if}
+              </div>
             </div>
           </div>
-        </div>
+        </TiltCard>
       {/each}
     </div>
   </div>
