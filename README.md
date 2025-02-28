@@ -1,7 +1,18 @@
-# Frontend code for my portfolio website
+# Portfolio Frontend
 
-## Technologies used
+A modern and responsive portfolio website built with SvelteKit and TailwindCSS.
 
-- SvelteKit
+## Features
+
+- Responsive design
+- Project showcase
+- Dark mode support
+- SEO optimized
+- Static site generation
+
+## Technologies Used
+
+- SvelteKit 2.x
+- Tailwind CSS 3.x
 - TypeScript
-- Coolify
+- Docker for containerization
