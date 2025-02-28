@@ -123,97 +123,6 @@
     }
   ];
 
-  // Certifications
-  interface Certification {
-    name: string;
-    issuer: string;
-    date: string;
-    credentialId?: string;
-    url?: string;
-    logoUrl?: string;
-  }
-
-  const certifications: Certification[] = [
-    {
-      name: 'Machine Learning',
-      issuer: 'Coursera',
-      date: 'Jan 2022',
-      credentialId: '65A369CYKLX2',
-      url: 'https://www.coursera.org/account/accomplishments/verify/65A369CYKLX2',
-      logoUrl: 'https://logo.clearbit.com/coursera.org'
-    },
-    {
-      name: 'Deep Learning',
-      issuer: 'Coursera',
-      date: 'Dec 2020',
-      credentialId: '3V9L4WBH782L',
-      url: 'https://www.coursera.org/account/accomplishments/verify/3V9L4WBH782L',
-      logoUrl: 'https://logo.clearbit.com/coursera.org'
-    },
-    {
-      name: 'Sequence Models',
-      issuer: 'Coursera',
-      date: 'Dec 2020',
-      credentialId: '642LREVVTQYU',
-      url: 'https://www.coursera.org/account/accomplishments/verify/642LREVVTQYU',
-      logoUrl: 'https://logo.clearbit.com/coursera.org'
-    },
-    {
-      name: 'Convolutional Neural Networks',
-      issuer: 'Coursera',
-      date: 'Nov 2020',
-      credentialId: 'PYLVXRWREKQ3',
-      url: 'https://www.coursera.org/account/accomplishments/verify/PYLVXRWREKQ3',
-      logoUrl: 'https://logo.clearbit.com/coursera.org'
-    },
-    {
-      name: 'Improving Deep Neural Networks',
-      issuer: 'Coursera',
-      date: 'Oct 2020',
-      credentialId: 'A83SNX96PRZK',
-      url: 'https://www.coursera.org/account/accomplishments/verify/A83SNX96PRZK',
-      logoUrl: 'https://logo.clearbit.com/coursera.org'
-    },
-    {
-      name: 'How Google does Machine Learning',
-      issuer: 'Google',
-      date: 'Sep 2020',
-      credentialId: 'LGR7YDZ4EB6J',
-      url: 'https://www.coursera.org/account/accomplishments/verify/LGR7YDZ4EB6J',
-      logoUrl: 'https://logo.clearbit.com/google.com'
-    },
-    {
-      name: 'Neural Networks and Deep Learning',
-      issuer: 'Coursera',
-      date: 'Sep 2020',
-      credentialId: '6BB35SRGNBQF',
-      url: 'https://www.coursera.org/account/accomplishments/verify/6BB35SRGNBQF',
-      logoUrl: 'https://logo.clearbit.com/coursera.org'
-    },
-    {
-      name: 'Structuring Machine Learning Projects',
-      issuer: 'Coursera',
-      date: 'Sep 2020',
-      credentialId: '9Z8EKGP3XN4M',
-      url: 'https://www.coursera.org/account/accomplishments/verify/9Z8EKGP3XN4M',
-      logoUrl: 'https://logo.clearbit.com/coursera.org'
-    },
-    {
-      name: 'JavaScript Algorithms and Data Structures',
-      issuer: 'freeCodeCamp',
-      date: 'Mar 2020',
-      url: 'https://www.freecodecamp.org/certification/fcc/javascript-algorithms-and-data-structures',
-      logoUrl: 'https://logo.clearbit.com/freecodecamp.org'
-    },
-    {
-      name: 'Data Scientist',
-      issuer: 'Workera',
-      date: 'Jan 2020',
-      credentialId: 'LKPVCBGK',
-      url: 'https://workera.ai/candidates/certificate/LKPVCBGK',
-      logoUrl: 'https://logo.clearbit.com/workera.ai'
-    }
-  ];
 
   // For interactive experience and education cards
   import { writable } from 'svelte/store';
@@ -340,33 +249,7 @@
         </div>
       </div>
 
-      <!-- Download CV Button -->
-      <div class="mt-8 flex justify-center">
-        <a 
-          href="#" 
-          class="download-cv-btn inline-flex items-center gap-3 px-8 py-4 bg-primary text-primary-foreground rounded-xl hover:bg-primary/90 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-primary/20 text-lg font-medium animate-subtle-pulse"
-        >
-          <svg 
-            xmlns="http://www.w3.org/2000/svg" 
-            width="24" 
-            height="24" 
-            viewBox="0 0 24 24" 
-            fill="none" 
-            stroke="currentColor" 
-            stroke-width="2" 
-            stroke-linecap="round" 
-            stroke-linejoin="round"
-            class="animate-bounce-gentle"
-          >
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-            <polyline points="7 10 12 15 17 10"></polyline>
-            <line x1="12" y1="15" x2="12" y2="3"></line>
-          </svg>
-          <span>Download CV</span>
-        </a>
-      </div>
-    </div>
-  </div>
+
 </section>
 
 <style>
@@ -379,75 +262,9 @@
     animation: fadeIn 0.3s ease-in-out;
   }
 
-  @keyframes subtle-pulse {
-    0% { box-shadow: 0 0 0 0 rgba(var(--primary), 0.4); }
-    70% { box-shadow: 0 0 0 10px rgba(var(--primary), 0); }
-    100% { box-shadow: 0 0 0 0 rgba(var(--primary), 0); }
-  }
-
-  @keyframes bounce-gentle {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(3px); }
-  }
-
-  .animate-bounce-gentle {
-    animation: bounce-gentle 2s ease-in-out infinite;
-  }
-
-  .animate-subtle-pulse {
-    animation: subtle-pulse 2s infinite;
-  }
-  
-  /* Hide scrollbar for carousel */
-  .hide-scrollbar {
-    -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;  /* Firefox */
-  }
-  
-  .hide-scrollbar::-webkit-scrollbar {
-    display: none;  /* Chrome, Safari and Opera */
-  }
-  
-  .carousel-container {
-    scroll-behavior: smooth;
-    -webkit-overflow-scrolling: touch;
-    scroll-snap-type: x mandatory;
-  }
-
-  .carousel-container > div {
-    scroll-snap-align: start;
-  }
-  
   /* Extra small text for compact legends */
   .text-2xs {
     font-size: 0.65rem;
     line-height: 1rem;
-  }
-
-  .download-cv-btn {
-    position: relative;
-    isolation: isolate;
-    overflow: hidden;
-  }
-
-  .download-cv-btn:hover::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-      45deg,
-      transparent 25%,
-      rgba(255, 255, 255, 0.1) 50%,
-      transparent 75%
-    );
-    transform: translateX(-100%);
-    animation: shine 1.5s infinite;
-    z-index: -1;
-  }
-
-  @keyframes shine {
-    100% {
-      transform: translateX(100%);
-    }
   }
 </style> 
