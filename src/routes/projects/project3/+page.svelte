@@ -64,6 +64,6 @@
   :global(.dark) {
     --tw-prose-invert-body: theme(colors.foreground);
     --tw-prose-invert-headings: theme(colors.foreground);
-    --tw-prose-invert-links: theme(colors.primary);
+    --tw-prose-invert-links: theme(colors.primary.DEFAULT);
   }
 </style> 
