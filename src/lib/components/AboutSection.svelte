@@ -123,7 +123,6 @@
     }
   ];
 
-
   // For interactive experience and education cards
   import { writable } from 'svelte/store';
   import { onMount } from 'svelte';
@@ -131,9 +130,6 @@
   
   // Create a store for the currently selected item
   const selectedItemId = writable(timelineItems[0]?.id || '');
-  
-
-
 </script>
 
 <section id="about" class="min-h-screen py-16 bg-background">
@@ -248,8 +244,8 @@
           </div>
         </div>
       </div>
-
-
+    </div>
+  </div>
 </section>
 
 <style>

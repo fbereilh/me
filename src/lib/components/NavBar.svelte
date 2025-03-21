@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button';
 	import { onMount } from 'svelte';
+	import { page } from '$app/stores';
 	
 	// Track active section
 	let activeSection = 'home';
@@ -20,16 +21,22 @@
 	
 	// Handle smooth scrolling
 	function scrollToSection(event: MouseEvent, id: string) {
-		event.preventDefault();
-		const element = document.getElementById(id);
-		if (element) {
-			element.scrollIntoView({ behavior: 'smooth' });
+		// Only handle smooth scroll on home page
+		if ($page.url.pathname === '/') {
+			event.preventDefault();
+			const element = document.getElementById(id);
+			if (element) {
+				element.scrollIntoView({ behavior: 'smooth' });
+			}
+			activeSection = id;
 		}
-		activeSection = id;
 	}
 	
 	// Update active section based on scroll position
 	function updateActiveSection() {
+		// Only track sections on home page
+		if ($page.url.pathname !== '/') return;
+		
 		const sections = ['home', 'about', 'projects', 'contact'];
 		let currentSection = activeSection;
 		
@@ -79,7 +86,7 @@
 	<div class="container flex h-14 items-center">
 		<div class="mr-4 flex">
 			<a 
-				href="#home" 
+				href="/" 
 				class="mr-6 flex items-center space-x-2"
 				on:click={(e) => scrollToSection(e, 'home')}
 			>
@@ -89,28 +96,28 @@
 		<div class="flex flex-1 items-center justify-between space-x-2 md:justify-end">
 			<nav class="flex items-center space-x-6">
 				<a 
-					href="#home" 
+					href="/" 
 					class="text-sm font-medium transition-colors hover:text-primary {activeSection === 'home' ? 'text-primary' : ''}"
 					on:click={(e) => scrollToSection(e, 'home')}
 				>
 					Home
 				</a>
 				<a 
-					href="#about" 
+					href="/#about" 
 					class="text-sm font-medium transition-colors hover:text-primary {activeSection === 'about' ? 'text-primary' : ''}"
 					on:click={(e) => scrollToSection(e, 'about')}
 				>
 					About
 				</a>
 				<a 
-					href="#projects" 
+					href="/#projects" 
 					class="text-sm font-medium transition-colors hover:text-primary {activeSection === 'projects' ? 'text-primary' : ''}"
 					on:click={(e) => scrollToSection(e, 'projects')}
 				>
 					Projects
 				</a>
 				<a 
-					href="#contact" 
+					href="/#contact" 
 					class="text-sm font-medium transition-colors hover:text-primary {activeSection === 'contact' ? 'text-primary' : ''}"
 					on:click={(e) => scrollToSection(e, 'contact')}
 				>

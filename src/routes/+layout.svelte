@@ -1,8 +1,21 @@
 <script lang="ts">
 	import '../app.css';
 	import NavBar from '$lib/components/NavBar.svelte';
+	import { onNavigate } from '$app/navigation';
+	import { goto } from '$app/navigation';
 	let { children } = $props();
 
+	// Reset scroll position on navigation
+	onNavigate((navigation) => {
+		if (navigation.to?.route.id !== '/') {
+			return new Promise((resolve) => {
+				navigation.complete.then(() => {
+					window.scrollTo(0, 0);
+					resolve();
+				});
+			});
+		}
+	});
 </script>
 
 <svelte:head>

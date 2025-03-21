@@ -1,5 +1,13 @@
-export { default as HeroSection } from './HeroSection.svelte';
-export { default as AboutSection } from './AboutSection.svelte';
-export { default as ProjectsSection } from './ProjectsSection.svelte';
-export { default as ContactSection } from './ContactSection.svelte';
-export { default as Footer } from './Footer.svelte'; 
+import HeroSection from './HeroSection.svelte';
+import AboutSection from './AboutSection.svelte';
+import ProjectsSection from './ProjectsSection.svelte';
+import ContactSection from './ContactSection.svelte';
+import Footer from './Footer.svelte';
+
+export {
+    HeroSection,
+    AboutSection,
+    ProjectsSection,
+    ContactSection,
+    Footer
+}; 

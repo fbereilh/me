@@ -1,5 +1,6 @@
 <script lang="ts">
   import TiltCard from '$lib/components/ui/tilt/TiltCard.svelte';
+  import { goto } from '$app/navigation';
 
   interface Project {
     title: string;
@@ -32,6 +33,14 @@
       link: "/projects/project3"
     }
   ];
+
+  async function handleProjectClick(link: string) {
+    try {
+      await goto(link, { replaceState: false });
+    } catch (error) {
+      console.error('Navigation error:', error);
+    }
+  }
 </script>
 
 <section id="projects" class="min-h-screen bg-background py-20">
