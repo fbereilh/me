@@ -1,4 +1,4 @@
-import adapter from '@sveltejs/adapter-auto';
+import adapter from '@sveltejs/adapter-node';
 import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 
 /** @type {import('@sveltejs/kit').Config} */
@@ -19,22 +19,7 @@ const config = {
 		alias: {
 			"@/*": "./src/lib/*",
 		},
-		prerender: {
-			handleHttpError: ({ path, referrer, message }) => {
-				// ignore image not found errors when prerendering
-				if (path.endsWith('.jpg') || path.endsWith('.png') || path.endsWith('.svg')) {
-					console.warn(`[prerender] Warning: Missing asset ${path} referred from ${referrer}`);
-					return;
-				}
-				
-				// otherwise fail the build
-				throw new Error(message);
-			},
-			handleMissingId: ({ id, path, referrers, message }) => {
-				// Log the warning but don't fail the build
-				console.warn(`[prerender] Warning: Missing ID "${id}" on page "${path}", referred from: ${referrers.join(', ')}`);
-			}
-		}
+
 	},
 };
 
