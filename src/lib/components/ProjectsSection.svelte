@@ -1,5 +1,5 @@
 <script lang="ts">
-  import TiltCard from '$lib/components/ui/tilt/TiltCard.svelte';
+  import CardWrapper from '$lib/components/ui/card/CardWrapper.svelte';
   import { goto } from '$app/navigation';
 
   interface Project {
@@ -12,24 +12,24 @@
 
   const projects: Project[] = [
     {
-      title: "Project 1",
-      description: "A brief description of project 1. This could be a few sentences about what the project does and what technologies it uses.",
+      title: "Advanced Time Series Forecasting",
+      description: "Developed a state-of-the-art forecasting system using ensemble methods and deep learning, achieving 30% improvement in prediction accuracy for complex time series data.",
       image: "/project1.jpg",
-      technologies: ["React", "Node.js", "MongoDB"],
+      technologies: ["PyTorch", "Prophet", "PySpark", "MLflow"],
       link: "/projects/project1"
     },
     {
-      title: "Project 2",
-      description: "A brief description of project 2. Highlighting the main features and technical challenges overcome.",
+      title: "Climate Data Analysis Platform",
+      description: "Interactive platform for climate data analysis using distributed computing and advanced visualization techniques. Processes terabytes of satellite data in near real-time.",
       image: "/project2.jpg",
-      technologies: ["Vue", "Express", "PostgreSQL"],
+      technologies: ["Python", "Dask", "D3.js", "FastAPI"],
       link: "/projects/project2"
     },
     {
-      title: "Project 3",
-      description: "A brief description of project 3. Focusing on the problem solved and the solution implemented.",
+      title: "Neural Network Visualization Tool",
+      description: "Interactive deep learning visualization tool with real-time training metrics and architecture exploration. Used in production for model interpretability and debugging.",
       image: "/project3.jpg",
-      technologies: ["Svelte", "FastAPI", "Redis"],
+      technologies: ["TensorFlow.js", "React", "WebGL", "scikit-learn"],
       link: "/projects/project3"
     }
   ];
@@ -43,53 +43,70 @@
   }
 </script>
 
-<section id="projects" class="min-h-screen bg-background py-20">
-  <div class="container mx-auto px-4">
-    <h2 class="text-4xl font-bold text-center mb-12">Projects</h2>
-    
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {#each projects as project}
-        <TiltCard>
-          <div class="group relative bg-card rounded-xl overflow-hidden border border-border hover:border-primary/50 transition-colors duration-300 h-full flex flex-col">
-            <!-- Image -->
-            <div class="relative aspect-video overflow-hidden">
-              <img
-                src={project.image}
-                alt={project.title}
-                class="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300"
-              />
-            </div>
-
-            <!-- Content -->
-            <div class="p-6 space-y-4 flex flex-col flex-grow">
-              <h3 class="text-xl font-bold">{project.title}</h3>
-              <p class="text-muted-foreground text-sm line-clamp-3 flex-grow">{project.description}</p>
-
-              <!-- Technologies -->
-              <div class="flex flex-wrap gap-2">
-                {#each project.technologies as tech}
-                  <span class="px-2 py-1 rounded-full bg-primary/10 text-primary text-xs">
-                    {tech}
-                  </span>
-                {/each}
+<section id="projects" class="py-20 bg-background/50">
+  <div class="container mx-auto px-6">
+    <div class="max-w-5xl mx-auto">
+      <h2 class="text-5xl font-bold text-center mb-14">
+        <span class="relative z-10">My <span class="text-primary">Projects</span></span>
+      </h2>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {#each projects as project}
+          <CardWrapper>
+            <div class="group relative bg-background/50 rounded-xl overflow-hidden border border-border/10 shadow-sm hover:shadow-md hover:border-primary/30 transition-all duration-300 h-full flex flex-col">
+              <!-- Image -->
+              <div class="relative aspect-video overflow-hidden">
+                <img
+                  src={project.image}
+                  alt={project.title}
+                  class="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500"
+                />
+                <div class="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               </div>
 
-              <!-- Link -->
-              <a
-                href={project.link}
-                class="inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground ring-offset-background transition-colors hover:bg-primary/90 w-full mt-2"
-              >
-                View Project
-              </a>
+              <!-- Content -->
+              <div class="p-6 space-y-4 flex flex-col flex-grow">
+                <h3 class="text-xl font-bold relative inline-block">
+                  <span class="relative z-10">{project.title}</span>
+                  <span class="absolute bottom-0 left-0 w-full h-2 bg-primary/10 -z-10 group-hover:bg-primary/20 transition-colors duration-300"></span>
+                </h3>
+                <p class="text-muted-foreground line-clamp-3 flex-grow">{project.description}</p>
+
+                <!-- Technologies -->
+                <div class="flex flex-wrap gap-2 pt-2">
+                  {#each project.technologies as tech}
+                    <span class="px-3 py-1 rounded-full bg-primary/5 text-primary/80 text-xs transition-all hover:bg-primary/10">
+                      {tech}
+                    </span>
+                  {/each}
+                </div>
+
+                <!-- Link -->
+                <a
+                  href={project.link}
+                  class="inline-flex h-10 items-center justify-center rounded-md bg-primary/10 text-primary px-4 text-sm font-medium transition-all hover:bg-primary hover:text-primary-foreground w-full mt-4 hover:translate-y-[-2px]"
+                >
+                  View Project
+                </a>
+              </div>
             </div>
-          </div>
-        </TiltCard>
-      {/each}
+          </CardWrapper>
+        {/each}
+      </div>
     </div>
   </div>
 </section>
 
 <style>
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  .animate-fadeIn {
+    animation: fadeIn 0.8s ease-out;
+  }
+
   .line-clamp-3 {
     display: -webkit-box;
     -webkit-line-clamp: 3;
