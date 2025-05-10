@@ -27,16 +27,18 @@
           </div>
         </div>
 
-        <!-- Right side - Image/Visual -->
-        <div class="relative lg:h-[450px] w-full order-first lg:order-last">
-          <div class="absolute inset-0 bg-gradient-to-tr from-primary/20 to-background rounded-2xl shadow-lg border border-border/10">
-            <div class="absolute inset-0 flex items-center justify-center">
-              <div class="relative w-full h-full rounded-2xl overflow-hidden bg-muted/50 backdrop-blur-sm">
-                <div class="absolute inset-0 flex items-center justify-center text-muted-foreground/70 animate-fadeIn">
-                  Coming soon: Hero Image
-                </div>
-              </div>
-            </div>
+        <!-- Right side - Hero Image as a circle -->
+        <div class="relative w-full h-full flex items-center justify-center order-first lg:order-last">
+          <div class="relative w-[300px] h-[300px] md:w-[650px] md:h-[650px] rounded-full overflow-hidden  shadow-xl animate-fadeIn">
+
+            
+            <!-- Portrait image -->
+            <img 
+              src="/hero.png" 
+              alt="Felipe Bereilh" 
+              class="absolute inset-0 w-full h-full object-cover mix-blend-normal"
+            />
+
           </div>
         </div>
       </div>
