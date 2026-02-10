@@ -25,13 +25,6 @@
       />
     </div>
   </div>
-
-  <!-- Scroll indicator -->
-  <a href="#about" class="scroll-indicator" aria-label="Scroll to about section">
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M12 5v14M5 12l7 7 7-7"/>
-    </svg>
-  </a>
 </section>
 
 <style>
@@ -138,29 +131,6 @@
 
   .hero-image img:hover {
     transform: scale(1.05);
-  }
-
-  .scroll-indicator {
-    position: absolute;
-    bottom: 2rem;
-    left: 50%;
-    transform: translateX(-50%);
-    color: var(--text-secondary);
-    animation: bounce 2s infinite;
-    cursor: pointer;
-  }
-
-  .scroll-indicator:hover {
-    color: var(--primary);
-  }
-
-  @keyframes bounce {
-    0%, 100% {
-      transform: translateX(-50%) translateY(0);
-    }
-    50% {
-      transform: translateX(-50%) translateY(-10px);
-    }
   }
 
   /* Responsive */
