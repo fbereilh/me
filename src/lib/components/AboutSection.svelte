@@ -62,7 +62,7 @@
             I started in <strong>marketing analytics</strong> at LATAM Airlines, where I learned that numbers tell better stories than slides. That curiosity led me to <strong>Mercado Libre</strong>, where I spent two years as a data analyst building ETLs and fixing messy catalog data. Turns out I liked wrangling data more than I expected.
           </p>
           <p>
-            The shift to <strong>data science</strong> happened at PedidosYa and La Nacion, where I got to build actual <strong>ML models</strong>—audience clustering, purchase prediction, A/B testing for paywalls. At Preply, I focused on product analytics and optimizing mobile funnels.
+            The shift to <strong>data science</strong> happened at PedidosYa and La Nacion, where I got to build actual <strong>ML models</strong>: audience clustering, purchase prediction, A/B testing for paywalls. At Preply, I focused on product analytics and optimizing mobile funnels.
           </p>
           <p>
             Now at <strong>ByRatings</strong> as a Senior Data Scientist, I take models from idea to <strong>production</strong>. I still do a lot of what data engineers do (pipelines, infrastructure, making sure things don't break), because that's how you ship ML that actually works.
