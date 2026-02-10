@@ -37,6 +37,11 @@
     : posts;
 </script>
 
+<svelte:head>
+  <title>Blog - Felipe Bereilh | Data Science & ML Articles</title>
+  <meta name="description" content="Thoughts on data science, machine learning, and production ML systems. Jupyter notebooks and technical articles by Felipe Bereilh." />
+</svelte:head>
+
 <section class="blog">
   <div class="blog-container">
     <h1 class="page-title">Blog</h1>
