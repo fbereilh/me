@@ -10,7 +10,7 @@
 <section id="contact" class="contact">
   <div class="contact-container">
     <h2 class="section-title">
-      Let's <span class="highlight">Talk</span>
+      Let's <span class="highlight">Talk</span> 💬
     </h2>
     
     <div class="contact-card">

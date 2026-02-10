@@ -33,7 +33,7 @@
 
   // Filter posts by selected category
   $: filteredPosts = selectedCategory
-    ? posts.filter(p => p.categories?.includes(selectedCategory))
+    ? posts.filter(p => p.categories?.includes(selectedCategory as string))
     : posts;
 </script>
 

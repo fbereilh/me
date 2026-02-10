@@ -20,13 +20,13 @@
 
 <section id="about" class="about">
   <div class="about-container">
-    <h2 class="section-title">About <span class="highlight">Me</span></h2>
+    <h2 class="section-title">About <span class="highlight">Me</span> 👋</h2>
     
     <!-- Bio -->
     <div class="bio">
       <p>
-        I'm based in Barcelona, where I spend my days teaching computers to recognize patterns and make predictions.
-        Whether it's spotting trends in messy data or building models that actually work in production, I focus on solutions that move the needle.
+        I'm based in <strong>Barcelona</strong>, where I spend my days teaching computers to recognize patterns and make predictions.
+        Whether it's spotting trends in messy data or building models that actually work in <strong>production</strong>, I focus on solutions that move the needle.
       </p>
     </div>
     
@@ -59,13 +59,13 @@
         
         <div class="career-summary">
           <p>
-            I started in marketing analytics at LATAM Airlines, where I learned that numbers tell better stories than slides. That curiosity led me to Mercado Libre, where I spent two years as a data analyst building ETLs and fixing messy catalog data. Turns out I liked wrangling data more than I expected.
+            I started in <strong>marketing analytics</strong> at LATAM Airlines, where I learned that numbers tell better stories than slides. That curiosity led me to <strong>Mercado Libre</strong>, where I spent two years as a data analyst building ETLs and fixing messy catalog data. Turns out I liked wrangling data more than I expected.
           </p>
           <p>
-            The shift to data science happened at PedidosYa and La Nacion, where I got to build actual ML models—audience clustering, purchase prediction, A/B testing for paywalls. At Preply, I focused on product analytics and optimizing mobile funnels.
+            The shift to <strong>data science</strong> happened at PedidosYa and La Nacion, where I got to build actual <strong>ML models</strong>—audience clustering, purchase prediction, A/B testing for paywalls. At Preply, I focused on product analytics and optimizing mobile funnels.
           </p>
           <p>
-            Now at ByRatings as a Senior Data Scientist, I take models from idea to production. I still do a lot of what data engineers do (pipelines, infrastructure, making sure things don't break), because that's how you ship ML that actually works.
+            Now at <strong>ByRatings</strong> as a Senior Data Scientist, I take models from idea to <strong>production</strong>. I still do a lot of what data engineers do (pipelines, infrastructure, making sure things don't break), because that's how you ship ML that actually works.
           </p>
         </div>
       </div>
