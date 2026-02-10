@@ -1,18 +1,25 @@
-# Portfolio Frontend
+# Personal Site
 
-A modern and responsive portfolio website built with SvelteKit and TailwindCSS.
+Portfolio and blog built with SvelteKit and Quarto.
 
-## Features
+## Stack
 
-- Responsive design
-- Project showcase
-- Dark mode support
-- SEO optimized
-- Static site generation
+- **Frontend**: SvelteKit + Vanilla CSS
+- **Blog**: Quarto (Jupyter notebooks → HTML)
+- **Dev Environment**: Devbox (Bun + Quarto + UV)
 
-## Technologies Used
+## Development
 
-- SvelteKit 2.x
-- Tailwind CSS 3.x
-- TypeScript
-- Docker for containerization
+```bash
+devbox shell
+bun install
+bun run dev
+```
+
+## Blog Workflow
+
+```bash
+# Create notebook in nbs/
+# Add YAML frontmatter with title, date, categories
+devbox run render  # Converts notebooks to HTML
+```
