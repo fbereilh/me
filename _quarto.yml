@@ -1,0 +1,6 @@
+format:
+  html:
+    theme: cosmo
+    code-fold: false
+    code-tools: false
+    toc: false

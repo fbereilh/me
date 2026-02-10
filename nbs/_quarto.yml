@@ -1,0 +1,10 @@
+project:
+  output-dir: ../static/posts
+
+format:
+  html:
+    theme: cosmo
+    code-fold: false
+    code-tools: false
+    toc: false
+    title-block-banner: false

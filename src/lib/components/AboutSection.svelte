@@ -2,122 +2,71 @@
   // Skills data structure
   interface Skill {
     name: string;
-    level: number; // 1-10
   }
 
-  // Core data science skills based on LinkedIn certifications
   const coreSkills: Skill[] = [
-    { name: 'Machine Learning', level: 9 },
-    { name: 'Deep Learning', level: 9 },
-    { name: 'Neural Networks', level: 8 },
-    { name: 'Statistical Modeling', level: 9 },
-    { name: 'Data Visualization', level: 8 },
-    { name: 'Sequence Models', level: 8 },
-    { name: 'Convolutional Neural Networks', level: 8 }
-  ];
+    { name: 'Machine Learning'},
+    { name: 'Deep Learning' },
+    { name: 'Data Visualization'},
+    { name: 'A/B Testing' },
+    { name: 'Model Deployment' },
+    { name: 'Data Engineering' }];
 
-  // Technologies from LinkedIn certifications
   const technologies: string[] = [
-    'Python', 'TensorFlow', 'PyTorch', 'scikit-learn', 'Pandas',
-    'SQL', 'JavaScript', 'Google Cloud', 'Algorithms', 'Hyperparameter Tuning'
-  ];
-
-  // Career highlights
-  interface Experience {
-    title: string;
-    company: string;
-    period: string;
-    description: string;
-  }
-
-  const experiences: Experience[] = [
-    {
-      title: 'Data Scientist',
-      company: 'ByRatings',
-      period: '2022 - Present',
-      description: 'Pioneering the integration of machine learning models for data analysis and insights. Developing advanced analytics solutions for business intelligence.'
-    },
-    {
-      title: 'Teaching Assistant',
-      company: 'Instituto Tecnológico de Buenos Aires',
-      period: '2017 - 2018',
-      description: 'Instructed engineering students in machine learning algorithms and statistical modeling techniques.'
-    },
-    {
-      title: 'Data Engineer',
-      company: 'Freelance',
-      period: '2016 - 2018',
-      description: 'Designed data pipelines and analytics solutions. Implemented ETL processes for machine learning applications.'
-    }
+    'Python', 'PyTorch', 'scikit-learn', 'Pandas',
+    'SQL', 'TypeScript', 'Svelte', 'Google Cloud Platform','AWS', 'Docker', 'Kubernetes'
   ];
 </script>
 
-<section id="about" class="py-20 bg-background/[0.03] border-t border-primary/5">
-  <div class="container mx-auto px-6">
-    <div class="max-w-4xl mx-auto">
-      <h2 class="text-5xl font-bold mb-14 text-center">About <span class="text-primary">Me</span></h2>
-      
-      <!-- Bio with subtle reveal animation -->
-      <div class="mb-16 animate-fadeIn">
-        <p class="text-xl leading-relaxed text-center mx-auto max-w-2xl">
-          Data Scientist based in Barcelona with expertise in machine learning and deep neural networks.
-          I transform complex datasets into actionable business insights using advanced statistical methods
-          and AI technologies.
-        </p>
-      </div>
-      
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
-        <!-- Skills Section -->
-        <div class="space-y-8 p-8">
-          <h3 class="text-2xl font-bold relative inline-block">
-            <span class="relative z-10">Technical Skills</span>
-            <span class="absolute bottom-0 left-0 w-full h-2 bg-primary/20 -z-10"></span>
-          </h3>
+<section id="about" class="about">
+  <div class="about-container">
+    <h2 class="section-title">About <span class="highlight">Me</span></h2>
+    
+    <!-- Bio -->
+    <div class="bio">
+      <p>
+        I'm based in Barcelona, where I spend my days teaching computers to recognize patterns and make predictions.
+        Whether it's spotting trends in messy data or building models that actually work in production, I focus on solutions that move the needle.
+      </p>
+    </div>
+    
+    <div class="content-grid">
+      <!-- Skills Section -->
+      <div class="card">
+        <h3 class="card-title">What I Do</h3>
+        
+        <div class="skills-content">
+          <div class="core-skills">
+            {#each coreSkills as skill}
+              <span class="skill-badge">{skill.name}</span>
+            {/each}
+          </div>
           
-          <!-- Core Skills -->
-          <div class="space-y-6">
-            <div class="flex flex-wrap gap-3">
-              {#each coreSkills as skill}
-                <span class="px-4 py-1.5 rounded-full bg-primary/10 text-primary font-medium transition-all hover:bg-primary/20">
-                  {skill.name}
-                </span>
+          <div class="technologies">
+            <h4>Tools I Like</h4>
+            <div class="tech-list">
+              {#each technologies as tech}
+                <span class="tech-badge">{tech}</span>
               {/each}
-            </div>
-            
-            <!-- Technologies -->
-            <div class="space-y-4">
-              <h4 class="font-semibold text-base">Technologies</h4>
-              <div class="flex flex-wrap gap-2">
-                {#each technologies as tech}
-                  <span class="px-3 py-1 rounded-full bg-primary/5 text-primary/80 text-sm transition-all hover:bg-primary/10">
-                    {tech}
-                  </span>
-                {/each}
-              </div>
             </div>
           </div>
         </div>
+      </div>
+      
+      <!-- Career Summary -->
+      <div class="card">
+        <h3 class="card-title">My Journey</h3>
         
-        <!-- Experience Section -->
-        <div class="space-y-8 p-8">
-          <h3 class="text-2xl font-bold relative inline-block">
-            <span class="relative z-10">Experience</span>
-            <span class="absolute bottom-0 left-0 w-full h-2 bg-primary/20 -z-10"></span>
-          </h3>
-          
-          <div class="space-y-6">
-            {#each experiences as experience}
-              <div class="pb-5 border-b border-border/20 last:border-0 last:pb-0 transition-all hover:translate-x-1">
-                <h4 class="text-lg font-semibold text-primary">{experience.title}</h4>
-                <p class="text-base mb-2 flex items-center gap-2">
-                  <span class="font-medium">{experience.company}</span>
-                  <span class="w-1.5 h-1.5 rounded-full bg-primary/40"></span>
-                  <span class="text-muted-foreground text-sm">{experience.period}</span>
-                </p>
-                <p class="text-muted-foreground">{experience.description}</p>
-              </div>
-            {/each}
-          </div>
+        <div class="career-summary">
+          <p>
+            I started in marketing analytics at LATAM Airlines, where I learned that numbers tell better stories than slides. That curiosity led me to Mercado Libre, where I spent two years as a data analyst building ETLs and fixing messy catalog data. Turns out I liked wrangling data more than I expected.
+          </p>
+          <p>
+            The shift to data science happened at PedidosYa and La Nacion, where I got to build actual ML models—audience clustering, purchase prediction, A/B testing for paywalls. At Preply, I focused on product analytics and optimizing mobile funnels.
+          </p>
+          <p>
+            Now at ByRatings as a Senior Data Scientist, I take models from idea to production. I still do a lot of what data engineers do (pipelines, infrastructure, making sure things don't break), because that's how you ship ML that actually works.
+          </p>
         </div>
       </div>
     </div>
@@ -125,18 +74,144 @@
 </section>
 
 <style>
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  
-  .animate-fadeIn {
-    animation: fadeIn 0.8s ease-out;
+  .about {
+    padding: 5rem 2rem;
+    background: var(--bg-primary);
   }
 
-  /* Extra small text for compact legends */
-  .text-2xs {
-    font-size: 0.65rem;
-    line-height: 1rem;
+  .about-container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .section-title {
+    font-size: 3rem;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 3.5rem;
+    color: var(--text-primary);
+  }
+
+  .highlight {
+    color: var(--primary);
+  }
+
+  .bio {
+    max-width: 800px;
+    margin: 0 auto 4rem;
+    text-align: center;
+  }
+
+  .bio p {
+    font-size: 1.25rem;
+    line-height: 1.8;
+    color: var(--text-secondary);
+  }
+
+  .content-grid {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 2rem;
+  }
+
+  .card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 1rem;
+    padding: 2rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s;
+  }
+
+  .card:hover {
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    transform: translateY(-4px);
+  }
+
+  .card-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 1.5rem;
+  }
+
+  .skills-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  .core-skills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .skill-badge {
+    padding: 0.5rem 1rem;
+    background: var(--primary);
+    color: white;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+
+  .technologies h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.75rem;
+  }
+
+  .tech-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .tech-badge {
+    padding: 0.375rem 0.75rem;
+    border: 1px solid var(--primary);
+    color: var(--primary);
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+  }
+
+  .career-summary {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .career-summary p {
+    color: var(--text-secondary);
+    line-height: 1.7;
+    font-size: 1rem;
+  }
+
+  /* Responsive */
+  @media (max-width: 1024px) {
+    .content-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .about {
+      padding: 4rem 1.5rem;
+    }
+
+    .section-title {
+      font-size: 2.5rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .bio p {
+      font-size: 1.125rem;
+    }
+
+    .card {
+      padding: 1.5rem;
+    }
   }
 </style> 
