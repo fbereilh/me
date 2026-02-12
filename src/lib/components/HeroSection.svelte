@@ -6,7 +6,7 @@
         Hi, I'm <span class="highlight">Felipe Bereilh</span>
       </h1>
       <p class="hero-subtitle">
-        Building intelligent systems that learn from data
+        Building systems that learn from data
       </p>
       <p class="hero-description">
         I design and deploy ML systems, from prototype to production.
