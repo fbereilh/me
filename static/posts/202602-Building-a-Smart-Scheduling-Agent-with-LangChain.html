@@ -10,7 +10,7 @@
 <meta name="dcterms.date" content="2026-02-10">
 <meta name="description" content="My todo list mocks me. It grows faster than I can check things off">
 
-<title>Building a Smart Scheduling Agent with LangChain</title>
+<title>Building a Smart Scheduling Agent</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -85,7 +85,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Building a Smart Scheduling Agent with LangChain</h1>
+<h1 class="title">Building a Smart Scheduling Agent</h1>
   <div class="quarto-categories">
     <div class="quarto-category">agents</div>
   </div>
@@ -122,8 +122,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<section id="building-a-smart-scheduling-agent-with-langchain" class="level1">
-<h1>Building a Smart Scheduling Agent with LangChain</h1>
+<section id="building-a-smart-scheduling-agent" class="level1">
+<h1>Building a Smart Scheduling Agent</h1>
 <blockquote class="blockquote">
 <p>My todo list mocks me. It grows faster than I can check things off</p>
 </blockquote>
@@ -163,10 +163,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>For our scheduling agent, we’ll mainly use <strong>Tools</strong> and <strong>Agents</strong> — the LLM will decide when to estimate time, check the calendar, or schedule a task.</p>
 </section>
 <section id="so-what-even-is-a-tool" class="level2">
-<h2 class="anchored" data-anchor-id="so-what-even-is-a-tool">So, what Even Is a Tool?</h2>
+<h2 class="anchored" data-anchor-id="so-what-even-is-a-tool">So, What Even Is a Tool?</h2>
 <p>In LangChain-land, a “tool” is just a Python function that an LLM can ask to use. That’s it. No magic.</p>
 <p>You create one with the <code>@tool</code> decorator:</p>
-<div id="5" class="cell" data-time_run="2026-02-12T22:42:10.041255+00:00">
+<div id="6" class="cell" data-time_run="2026-02-12T22:42:10.041255+00:00">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> langchain_core.tools <span class="im">import</span> tool</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="at">@tool</span></span>
@@ -174,7 +174,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Estimate how many minutes a task will take."""</span></span>
 <span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="dv">30</span>  <span class="co"># placeholder for now</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="6" class="cell" data-time_run="2026-02-12T22:42:10.069741+00:00">
+<div id="7" class="cell" data-time_run="2026-02-12T22:42:10.069741+00:00">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(estimate_duration.name)</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(estimate_duration.description)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
@@ -199,7 +199,7 @@ Estimate how many minutes a task will take.</code></pre>
 <p>First, let’s connect to an LLM. LangChain supports many providers — we’ll use Anthropic’s Claude.</p>
 <p>You’ll need an API key from <a href="https://console.anthropic.com/">Anthropic’s console</a>. Set it as an environment variable:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">ANTHROPIC_API_KEY</span><span class="op">=</span><span class="st">"your-key-here"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div id="9" class="cell" data-time_run="2026-02-12T22:42:10.093503+00:00">
+<div id="10" class="cell" data-time_run="2026-02-12T22:42:10.093503+00:00">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> langchain_anthropic <span class="im">import</span> ChatAnthropic</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>llm <span class="op">=</span> ChatAnthropic(model<span class="op">=</span><span class="st">"claude-sonnet-4-20250514"</span>)</span>
@@ -212,7 +212,7 @@ Estimate how many minutes a task will take.</code></pre>
 </div>
 </div>
 <p>We’re in business. Now let’s give this LLM some superpowers.</p>
-<div id="11" class="cell" data-time_run="2026-02-12T22:42:11.941911+00:00">
+<div id="12" class="cell" data-time_run="2026-02-12T22:42:11.941911+00:00">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>llm_with_tools <span class="op">=</span> llm.bind_tools([estimate_duration])</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>response <span class="op">=</span> llm_with_tools.invoke(<span class="st">"How long will it take to write a blog post?"</span>)</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(response.tool_calls)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -241,7 +241,7 @@ This is where <strong>Agents</strong> come in. An agent automates this loop: ask
 <h2 class="anchored" data-anchor-id="enter-the-agent">Enter the Agent</h2>
 <p>Remember that two-step dance? Ask the LLM, run the function, feed the result back? Yeah, I don’t want to do that manually every time. That’s exactly the kind of tedious loop computers were invented for.</p>
 <p>LangChain’s <code>create_react_agent</code> handles this for us. “ReAct” stands for Reason + Act — the agent thinks about what to do, calls a tool, observes the result, and keeps going until it has an answer.</p>
-<div id="14" class="cell" data-time_run="2026-02-12T22:42:13.538085+00:00">
+<div id="15" class="cell" data-time_run="2026-02-12T22:42:13.538085+00:00">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> langchain.agents <span class="im">import</span> create_agent</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Combine your tools</span></span>
