@@ -1,0 +1,290 @@
+{
+ "cells": [
+  {
+   "cell_type": "raw",
+   "id": "0",
+   "metadata": {
+    "time_run": "2026-02-12T21:36:40.285389+00:00"
+   },
+   "source": [
+    "---\n",
+    "title: \"Building a Smart Scheduling Agent with LangChain\"\n",
+    "author: \"Felipe Bereilh\"\n",
+    "date: \"2026-02-10\"\n",
+    "categories: []\n",
+    "description: \"A simple example showing sine and cosine functions with matplotlib.\"\n",
+    "---"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "7864abe8",
+   "metadata": {
+    "time_run": "2026-02-12T21:16:03.735401+00:00"
+   },
+   "source": [
+    "# Building a Smart Scheduling Agent with LangChain\n",
+    "\n",
+    "> My todo list mocks me. It grows faster than I can check things off\n",
+    "\n",
+    "---\n",
+    "\n",
+    "I'm terrible at estimating how long things take. That \"quick 30-minute task\" somehow devours two hours. And by the time I realize it, my carefully planned day is in ruins.\n",
+    "\n",
+    "So I decided to build an AI agent to do what I can't: estimate task durations realistically, look at my actual calendar, and schedule everything so it actually fits. Better yet — it learns from my mistakes.\n",
+    "\n",
+    "In this post, I'll walk through building a productivity agent with LangChain. Along the way, we'll explore how LangChain's tool-calling works under the hood, and create something genuinely useful."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "de7e3bea",
+   "metadata": {
+    "time_run": "2026-02-12T21:39:28.415137+00:00"
+   },
+   "source": [
+    "## The plan\n",
+    "\n",
+    "\n",
+    "**Core Features:**\n",
+    "1. **Time estimation** – LLM infers how long each task takes\n",
+    "2. **Calendar integration** – reads your available time slots\n",
+    "3. **Smart scheduling** – fits tasks into slots, splitting if needed\n",
+    "4. **Priority management** – respects your priorities but suggests swaps\n",
+    "5. **Learning loop** – tracks actual vs estimated time to improve predictions\n",
+    "\n",
+    "**Architecture we'll need:**\n",
+    "\n",
+    "```\n",
+    "┌─────────────┐     ┌─────────────┐     ┌─────────────┐\n",
+    "│   UI/Input  │────▶│  LLM Agent  │────▶│  Calendar   │\n",
+    "│   (todos)   │     │  (LangChain)│     │    API      │\n",
+    "└─────────────┘     └──────┬──────┘     └─────────────┘\n",
+    "                          │\n",
+    "                    ┌─────▼─────┐\n",
+    "                    │  Storage  │\n",
+    "                    │(estimates,│\n",
+    "                    │  actuals) │\n",
+    "                    └───────────┘\n",
+    "```\n",
+    "\n",
+    "Steps\n",
+    "1. **The estimation tool** – get the LLM to estimate task duration\n",
+    "2. **Calendar integration** – connect to Google Calendar (or another)\n",
+    "3. **The scheduling logic** – algorithm to fit tasks into slots\n",
+    "4. **Storage/learning** – track estimates vs actuals\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "576adb64",
+   "metadata": {
+    "time_run": "2026-02-12T21:29:25.130838+00:00"
+   },
+   "source": [
+    "## What is LangChain?\n",
+    "\n",
+    "LangChain is a framework for building applications with LLMs. Its key concepts are:\n",
+    "\n",
+    "1. **Models** – wrappers around LLMs (OpenAI, Anthropic, etc.)\n",
+    "2. **Tools** – functions the LLM can call (like checking your calendar)\n",
+    "3. **Agents** – LLMs that decide *which* tools to use and *when*\n",
+    "4. **Chains** – sequences of steps piped together\n",
+    "\n",
+    "For our scheduling agent, we'll mainly use **Tools** and **Agents** — the LLM will decide when to estimate time, check the calendar, or schedule a task.\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "a6cebce9",
+   "metadata": {
+    "time_run": "2026-02-12T21:26:48.635144+00:00"
+   },
+   "source": [
+    "## So, what Even Is a Tool?\n",
+    "\n",
+    "In LangChain-land, a \"tool\" is just a Python function that an LLM can ask to use. That's it. No magic.\n",
+    "\n",
+    "You create one with the `@tool` decorator:\n",
+    "\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "5fbb217a",
+   "metadata": {
+    "time_run": "2026-02-12T21:27:11.532558+00:00"
+   },
+   "outputs": [],
+   "source": [
+    "from langchain_core.tools import tool\n",
+    "\n",
+    "@tool\n",
+    "def estimate_duration(task_description: str) -> int:\n",
+    "    \"\"\"Estimate how many minutes a task will take.\"\"\"\n",
+    "    return 30  # placeholder for now\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "5ddc06a2",
+   "metadata": {
+    "time_run": "2026-02-12T21:30:08.376052+00:00"
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "estimate_duration\n",
+      "Estimate how many minutes a task will take.\n"
+     ]
+    }
+   ],
+   "source": [
+    "print(estimate_duration.name)\n",
+    "print(estimate_duration.description)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "e4488ccb",
+   "metadata": {
+    "time_run": "2026-02-12T21:27:49.005489+00:00"
+   },
+   "source": [
+    "The LLM sees the function name and docstring — that's how it decides *when* to use it. Think of the docstring as the tool's sales pitch.\n",
+    "\n",
+    "## The Two-Step Dance\n",
+    "\n",
+    "Here's the part that confused me at first: **the LLM never actually runs your code.**\n",
+    "\n",
+    "When you ask \"How long will writing a blog post take?\", the LLM responds with something like:\n",
+    "\n",
+    "> \"I'd like to call `estimate_duration` with `'write a blog post'`\"\n",
+    "\n",
+    "That's it. It's a *request*, not an execution. Your code has to actually run the function and feed the result back. It's a polite back-and-forth — the LLM proposes, you execute.\n",
+    "\n",
+    "This is where agents come in, but we'll get there.\n",
+    "\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "31eeb47d",
+   "metadata": {
+    "time_run": "2026-02-12T21:35:51.943543+00:00"
+   },
+   "source": [
+    "\n",
+    "## Setting Up the Model\n",
+    "\n",
+    "First, let's connect to an LLM. LangChain supports many providers — we'll use Anthropic's Claude.\n",
+    "\n",
+    "You'll need an API key from [Anthropic's console](https://console.anthropic.com/). Set it as an environment variable:\n",
+    "\n",
+    "```bash\n",
+    "export ANTHROPIC_API_KEY=\"your-key-here\"\n",
+    "```"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "d80d3e4b",
+   "metadata": {
+    "time_run": "2026-02-12T21:35:35.370719+00:00"
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Hello there, how are you?\n"
+     ]
+    }
+   ],
+   "source": [
+    "from langchain_anthropic import ChatAnthropic\n",
+    "\n",
+    "llm = ChatAnthropic(model=\"claude-sonnet-4-20250514\")\n",
+    "\n",
+    "# Quick sanity check to make sure it's working:\n",
+    "response = llm.invoke(\"Say hello in exactly 5 words\")\n",
+    "print(response.content)\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "8d69cbce",
+   "metadata": {
+    "time_run": "2026-02-12T21:36:14.031062+00:00"
+   },
+   "source": [
+    "We're in business. Now let's give this LLM some superpowers."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "85e0c145",
+   "metadata": {
+    "time_run": "2026-02-12T21:22:13.460567+00:00"
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "[{'name': 'estimate_duration', 'args': {'task_description': 'write a blog post'}, 'id': 'toolu_015zvNLBsm2MJm9jmC7FPeBp', 'type': 'tool_call'}]\n"
+     ]
+    }
+   ],
+   "source": [
+    "response = llm_with_tools.invoke(\"How long will it take to write a blog post?\")\n",
+    "print(response.tool_calls)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "e657ab1f",
+   "metadata": {
+    "time_run": "2026-02-12T21:41:40.936942+00:00"
+   },
+   "source": [
+    "What just happened?\n",
+    "\n",
+    "**The LLM didn't actually run your function.** Instead, it said: *\"I want to call `estimate_duration` with this argument.\"*\n",
+    "\n",
+    "Look at what came back:\n",
+    "```python\n",
+    "{\n",
+    "    'name': 'estimate_duration',           # which tool to call\n",
+    "    'args': {'task_description': 'write a blog post'},  # with what input\n",
+    "    'id': 'toolu_015...',                  # unique ID for this call\n",
+    "    'type': 'tool_call'\n",
+    "}\n",
+    "```\n",
+    "\n",
+    "This is the key insight: **tool calling is a two-step dance**:\n",
+    "\n",
+    "1. **LLM decides** — \"I should use this tool with these arguments\"\n",
+    "2. **Your code executes** — you actually run the function and feed the result back\n",
+    "\n",
+    "The LLM is essentially saying *\"please call this function for me\"* — it can't run Python itself!\n",
+    "\n",
+    "---\n",
+    "\n",
+    "This is where **Agents** come in. An agent automates this loop: ask LLM → run tool → feed result back → repeat.\n"
+   ]
+  }
+ ],
+ "metadata": {
+  "solveit_dialog_mode": "learning",
+  "solveit_ver": 2
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}
