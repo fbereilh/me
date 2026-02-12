@@ -10,7 +10,8 @@
       "echo 'Welcome to your Svelte development environment!'",
       "echo 'Bun version:' && bun --version",
       "if [ ! -d \"node_modules\" ]; then echo 'Installing dependencies...' && bun install; fi",
-      "if [ ! -d \".venv\" ]; then echo 'Creating Python virtual environment...' && uv venv; fi"
+      "if [ ! -d \".venv\" ]; then echo 'Creating Python virtual environment...' && uv venv && uv pip install -e .; fi",
+      "if [ ! -f \".git/hooks/pre-commit\" ]; then echo 'Installing pre-commit hooks...' && uv run pre-commit install; fi"
     ],
     "scripts": {
       "install": "bun install",
