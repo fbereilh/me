@@ -125,6 +125,9 @@
     padding: 3rem;
     border-radius: 1rem;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+    font-size: 1.125rem;
+    line-height: 1.75;
   }
 
   /* Override Quarto's page layout */
@@ -151,24 +154,71 @@
 
   /* Style the Quarto content */
   :global(.post-content h1) {
-    font-size: 2.5rem;
+    font-size: 2.75rem;
     font-weight: 700;
     color: var(--text-primary);
     margin-bottom: 1.5rem;
+    line-height: 1.2;
+    letter-spacing: -0.025em;
   }
 
   :global(.post-content h2) {
-    font-size: 1.875rem;
+    font-size: 2rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-top: 3rem;
+    margin-bottom: 1rem;
+    line-height: 1.3;
+    letter-spacing: -0.02em;
+  }
+
+  :global(.post-content h3) {
+    font-size: 1.5rem;
     font-weight: 600;
     color: var(--text-primary);
     margin-top: 2rem;
-    margin-bottom: 1rem;
+    margin-bottom: 8.75rem;
+    line-height: 1.4;
   }
 
   :global(.post-content p) {
+    line-height: 1.8;
+    color: var(--text-primary);
+    margin-bottom: 1.25rem;
+  }
+
+  :global(.post-content strong) {
+    font-weight: 600;
+  }
+
+  :global(.post-content em) {
+    font-style: italic;
+  }
+
+  :global(.post-content li) {
+    color: var(--text-primary);
+    margin-bottom: 0.75rem;
     line-height: 1.7;
+  }
+
+  :global(.post-content ul),
+  :global(.post-content ol) {
+    margin: 1rem 0;
+    padding-left: 1.5rem;
+  }
+
+  :global(.post-content blockquote) {
     color: var(--text-secondary);
-    margin-bottom: 1rem;
+    border-left: 4px solid var(--primary);
+    padding-left: 1.5rem;
+    margin: 1.5rem 0;
+    font-style: italic;
+  }
+
+  :global(.post-content hr) {
+    border: none;
+    border-top: 2px solid var(--border);
+    margin: 3rem 0;
   }
 
   :global(.post-content img) {
@@ -178,13 +228,93 @@
     margin: 1.5rem 0;
   }
 
-  :global(.post-content pre),
   :global(.post-content div.sourceCode) {
+    background: #f8fafc !important;
+    padding: 0 !important;
+    border-radius: 0.5rem !important;
+    overflow-x: auto;
+    margin: 1rem 0 !important;
+    border: 1px solid #e2e8f0;
+  }
+
+  /* When a cell contains both code and output, group them */
+  :global(.post-content .cell:has(.cell-output)) {
+    margin: 1rem 0 !important;
+  }
+
+  :global(.post-content .cell:has(.cell-output) .code-copy-outer-scaffold) {
+    margin: 0 !important;
+    display: block !important;
+    line-height: 0 !important;
+    font-size: 0 !important;
+  }
+
+  :global(.post-content .cell:has(.cell-output) .sourceCode),
+  :global(.post-content .cell:has(.cell-output) .cell-code) {
+    margin: 0 !important;
+    border-bottom-left-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+    border-bottom: none !important;
+  }
+
+  :global(.post-content .cell-output),
+  :global(.post-content .cell-output-stdout) {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    border-left: 4px solid var(--primary) !important;
+    padding: 0 !important;
+    border-radius: 0.5rem !important;
+    margin: 0 !important;
+    overflow: hidden;
+  }
+
+  /* When output is in same cell as code, connect them */
+  :global(.post-content .cell .cell-output) {
+    margin: -3px 0 0 0 !important;
+    border-top-left-radius: 0 !important;
+    border-top-right-radius: 0 !important;
+  }
+
+  /* Add spacing after cells with outputs */
+  :global(.post-content .cell:has(.cell-output)) {
+    margin-bottom: 1rem !important;
+  }
+
+  :global(.post-content div.sourceCode pre) {
+    background: transparent !important;
+    border: none !important;
+    margin: 0 !important;
+    padding: 1rem !important;
+  }
+
+  :global(.post-content pre) {
     background: #f8fafc !important;
     padding: 1rem !important;
     border-radius: 0.5rem !important;
     overflow-x: auto;
     margin: 1rem 0;
+    border: 1px solid #e2e8f0;
+  }
+
+  :global(.post-content .cell-output),
+  :global(.post-content .cell-output-stdout) {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    border-left: 4px solid var(--primary) !important;
+    padding: 0 !important;
+    border-radius: 0.5rem !important;
+    margin: 1rem 0;
+    overflow: hidden;
+  }
+
+  :global(.post-content .cell-output pre),
+  :global(.post-content .cell-output-stdout pre) {
+    background: transparent !important;
+    border: none !important;
+    margin: 0 !important;
+    padding: 1rem !important;
+    border-radius: 0 !important;
+    color: var(--text-primary);
   }
 
   :global(.post-content code) {

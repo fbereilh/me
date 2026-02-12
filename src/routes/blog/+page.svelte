@@ -9,23 +9,9 @@
     categories?: string[];
   }
 
-  // For now, manually list posts - we can automate this later
-  const posts: Post[] = [
-    {
-      title: 'Example Notebook',
-      date: 'February 10, 2026',
-      description: 'A simple example showing sine and cosine functions with matplotlib.',
-      slug: 'example',
-      categories: ['python', 'visualization', 'matplotlib']
-    },
-    {
-      title: 'Data Analysis with Pandas',
-      date: 'February 10, 2026',
-      description: 'Exploring data analysis techniques using pandas DataFrames.',
-      slug: 'example2',
-      categories: ['python', 'data-science', 'pandas']
-    }
-  ];
+  // Get posts from server-side load function
+  export let data: { posts: Post[] };
+  const posts = data.posts;
 
   // Get unique categories from all posts
   let allCategories = [...new Set(posts.flatMap(p => p.categories || []))];
@@ -156,35 +142,62 @@
 
   .post-card {
     background: #ffffff;
-    border: 1px solid var(--border);
-    border-radius: 1rem;
-    padding: 2rem;
-    transition: all 0.3s;
+    border: 2px solid transparent;
+    border-radius: 1.25rem;
+    padding: 2.5rem;
+    transition: all 0.3s ease;
     display: flex;
     flex-direction: column;
     gap: 1rem;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  }
+
+  .post-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary), #6366f1);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s ease;
   }
 
   .post-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    transform: translateY(-6px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+    border-color: var(--border);
+  }
+
+  .post-card:hover::before {
+    transform: scaleX(1);
   }
 
   .post-title {
-    font-size: 1.5rem;
-    font-weight: 600;
+    font-size: 1.625rem;
+    font-weight: 700;
     color: var(--text-primary);
+    line-height: 1.3;
+    letter-spacing: -0.02em;
   }
 
   .post-date {
     font-size: 0.875rem;
     color: var(--text-secondary);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
   }
 
   .post-description {
     color: var(--text-secondary);
-    line-height: 1.6;
+    line-height: 1.7;
     flex-grow: 1;
+    font-size: 1rem;
   }
 
   .post-tags {
@@ -195,18 +208,28 @@
   }
 
   .tag {
-    padding: 0.25rem 0.75rem;
-    background: var(--bg-secondary);
-    border-radius: 1rem;
+    padding: 0.375rem 0.875rem;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    border-radius: 1.25rem;
     font-size: 0.75rem;
-    color: var(--text-secondary);
-    font-weight: 500;
+    color: var(--text-primary);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
   }
 
   .read-more {
     color: var(--primary);
-    font-weight: 600;
+    font-weight: 700;
     font-size: 0.875rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: gap 0.2s ease;
+  }
+
+  .post-card:hover .read-more {
+    gap: 0.75rem;
   }
 
   /* Responsive */
