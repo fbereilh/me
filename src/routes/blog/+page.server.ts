@@ -11,6 +11,7 @@ interface Post {
 
 export async function load() {
 	const postsDir = join(process.cwd(), 'static', 'posts');
+	const nbsDir = join(process.cwd(), 'nbs');
 	const files = readdirSync(postsDir).filter(file => file.endsWith('.html'));
 	
 	const posts: Post[] = files.map(file => {
@@ -22,8 +23,18 @@ export async function load() {
 		const dateMatch = content.match(/<meta name="dcterms\.date" content="(.*?)"/);
 		const descMatch = content.match(/<meta name="description" content="(.*?)"/);
 		
-		// Extract categories from content (you might want to adjust this)
-		const categories: string[] = [];
+		// Try to read categories from the notebook file
+		let categories: string[] = [];
+		try {
+			const nbFile = join(nbsDir, `${slug}.ipynb`);
+			const nbContent = readFileSync(nbFile, 'utf-8');
+			const categoryMatch = nbContent.match(/categories:\s*\[(.*?)\]/);
+			if (categoryMatch) {
+				categories = categoryMatch[1].split(',').map(c => c.trim().replace(/['"]/g, ''));
+			}
+		} catch (e) {
+			// If notebook doesn't exist, skip categories
+		}
 		
 		return {
 			title: titleMatch ? titleMatch[1] : slug,
