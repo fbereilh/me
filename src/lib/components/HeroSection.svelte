@@ -122,10 +122,14 @@
   }
 
   .hero-image img {
+
     width: 100%;
-    max-width: 500px;
+    max-width: 400px;
     height: auto;
-    border-radius: 60%;
+    border-radius: 50%;
+    box-shadow: 0 20px 20px rgba(255, 255, 255, 0.8);
+    transform: scale(1.1);
+    filter: brightness(1.1);
     transition: transform 0.3s;
   }
 
