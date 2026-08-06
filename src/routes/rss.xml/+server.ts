@@ -21,7 +21,7 @@ export const GET: RequestHandler = async () => {
 				`<title>${escapeXml(post.title)}</title>`,
 				`<link>${escapeXml(url)}</link>`,
 				`<guid isPermaLink="true">${escapeXml(url)}</guid>`,
-				`<description>${escapeXml(post.description)}</description>`,
+				...(post.description ? [`<description>${escapeXml(post.description)}</description>`] : []),
 				...(post.date ? [`<pubDate>${toRfc822(post.date)}</pubDate>`] : []),
 				...post.categories.map((category) => `<category>${escapeXml(category)}</category>`)
 			];

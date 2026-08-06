@@ -14,7 +14,12 @@ export const SITE_AUTHOR = 'Felipe Bereilh';
  */
 export interface SeoData {
 	title?: string;
-	description?: string;
+	/**
+	 * Omit to fall back to `SITE_DESCRIPTION`. Pass `null` when the page has no blurb of its
+	 * own but must not borrow the site's: the description tags are then left out entirely
+	 * rather than claiming the homepage's identity.
+	 */
+	description?: string | null;
 	image?: string;
 	type?: 'website' | 'article';
 	canonical?: string;

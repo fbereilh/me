@@ -32,7 +32,7 @@ export const load: PageServerLoad = ({ params }) => {
 		readingTimeMinutes,
 		seo: {
 			title: `${post.title} - Felipe Bereilh`,
-			description: post.description || undefined,
+			description: post.description || null,
 			type: 'article' as const,
 			publishedAt: post.date || undefined
 		}

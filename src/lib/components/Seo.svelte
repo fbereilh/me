@@ -28,7 +28,9 @@
 
 <svelte:head>
 	<title>{title}</title>
-	<meta name="description" content={description} />
+	{#if description}
+		<meta name="description" content={description} />
+	{/if}
 	<meta name="author" content={SITE_AUTHOR} />
 
 	{#if noindex}
@@ -41,7 +43,9 @@
 		<meta property="og:type" content={type} />
 		<meta property="og:url" content={canonical} />
 		<meta property="og:title" content={title} />
-		<meta property="og:description" content={description} />
+		{#if description}
+			<meta property="og:description" content={description} />
+		{/if}
 		<meta property="og:image" content={absoluteImage} />
 		{#if publishedAt}
 			<meta property="article:published_time" content={publishedAt} />
@@ -50,7 +54,9 @@
 		<meta name="twitter:card" content="summary_large_image" />
 		<meta name="twitter:url" content={canonical} />
 		<meta name="twitter:title" content={title} />
-		<meta name="twitter:description" content={description} />
+		{#if description}
+			<meta name="twitter:description" content={description} />
+		{/if}
 		<meta name="twitter:image" content={absoluteImage} />
 	{/if}
 </svelte:head>

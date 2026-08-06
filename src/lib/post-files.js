@@ -53,8 +53,10 @@ export function templatePath(cwd = process.cwd()) {
  * Pull the YAML frontmatter out of a notebook.
  *
  * The frontmatter lives in cell 0 as a `---` fenced block. Quarto accepts it in either a
- * markdown or a raw cell, so we accept both. Only the first fenced cell is considered,
- * which is what stops a `categories:` line inside a code cell from leaking in.
+ * markdown or a raw cell, so we accept both, and a leading `#| echo: false` code cell may
+ * precede it. Only that first prose cell is a candidate: body prose is markdown too, so
+ * scanning onward would let a `---` fenced thematic break deep in the post be read as
+ * frontmatter and publish a titleless, dateless page instead of failing.
  * @param {string} notebookSource
  * @returns {Frontmatter | null}
  */
@@ -67,21 +69,21 @@ export function parseNotebookFrontmatter(notebookSource) {
 		return null;
 	}
 
-	for (const cell of notebook.cells ?? []) {
-		if (cell.cell_type !== 'raw' && cell.cell_type !== 'markdown') continue;
+	const cell = (notebook.cells ?? []).find(
+		({ cell_type }) => cell_type === 'raw' || cell_type === 'markdown'
+	);
+	if (!cell) return null;
 
-		const source = Array.isArray(cell.source) ? cell.source.join('') : (cell.source ?? '');
-		const match = source.match(/^\s*---\r?\n([\s\S]*?)\r?\n---\s*$/);
-		if (!match) continue;
+	const source = Array.isArray(cell.source) ? cell.source.join('') : (cell.source ?? '');
+	const match = source.match(/^\s*---\r?\n([\s\S]*?)\r?\n---\s*$/);
+	if (!match) return null;
 
-		try {
-			const parsed = parseYaml(match[1]);
-			return parsed && typeof parsed === 'object' ? parsed : null;
-		} catch {
-			return null;
-		}
+	try {
+		const parsed = parseYaml(match[1]);
+		return parsed && typeof parsed === 'object' ? parsed : null;
+	} catch {
+		return null;
 	}
-	return null;
 }
 
 /**

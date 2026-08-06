@@ -61,6 +61,16 @@ describe('parseNotebookFrontmatter', () => {
 		).toBeNull();
 		expect(parseNotebookFrontmatter('not json')).toBeNull();
 	});
+
+	it('never reads body prose as frontmatter when cell 0 is not a valid fenced block', () => {
+		const parsed = parseNotebookFrontmatter(
+			notebook([
+				{ cell_type: 'markdown', source: '---\ntitle: "Fence never closes"\n' },
+				{ cell_type: 'markdown', source: '---\nNote: this matters\n---' }
+			])
+		);
+		expect(parsed).toBeNull();
+	});
 });
 
 describe('toPost', () => {

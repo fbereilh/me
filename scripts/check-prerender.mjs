@@ -73,6 +73,10 @@ for (const slug of slugs) {
 
 	check(Boolean(title), `${slug}: prerendered page has no <title>`);
 	check(
+		Boolean(description),
+		`${slug}: prerendered page ships no description - write a real one in the notebook frontmatter`
+	);
+	check(
 		!PLACEHOLDER_DESCRIPTION || description !== PLACEHOLDER_DESCRIPTION,
 		`${slug}: still ships the template's placeholder description - write a real one in the notebook frontmatter`
 	);
