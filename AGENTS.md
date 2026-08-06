@@ -42,8 +42,9 @@ Without devbox: `python3 scripts/new_post.py "Your Post Title"`, then `cd nbs &&
 - **Posts are authored-once snapshots.** Quarto publishes the outputs saved in the notebook
   and CI does not re-execute anything. If an output is wrong, fix it by running the cell
   yourself and saving.
-- **Before publishing**: clear outputs, run all, save, `quarto render`, then actually look at
-  the rendered page.
+- **Before publishing**: replace the template's placeholder `description` with a real blurb
+  and fill in `categories`, then clear outputs, run all, save, `quarto render`, and actually
+  look at the rendered page. `npm run test:prerender` fails on a leftover placeholder.
 
 `_`-prefixed notebooks (`nbs/_template.ipynb`) are ignored by Quarto and by `posts.ts`, so the
 template is never published.

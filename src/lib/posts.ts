@@ -1,6 +1,8 @@
-import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
-import { join } from 'node:path';
+import { readFileSync, statSync } from 'node:fs';
 import { parse as parseYaml } from 'yaml';
+import { notebookPath, publishedSlugs, renderedPostPath } from './post-files.js';
+
+export { renderedPostPath };
 
 /**
  * The single source of truth for blog post metadata.
@@ -31,8 +33,6 @@ interface Frontmatter {
 	author?: unknown;
 }
 
-const NOTEBOOK_DIR = 'nbs';
-const RENDERED_DIR = join('static', 'posts');
 const UNKNOWN_DATE = 'Unknown date';
 
 const dateFormatter = new Intl.DateTimeFormat('en-US', {
@@ -161,35 +161,15 @@ function readFrontmatter(path: string): Frontmatter | null {
 }
 
 /**
- * Where Quarto's rendered HTML for a post lives.
- *
- * Both the published filter below and the post route's `load` resolve the file through
- * here, so a post can never pass as published and then 404 when it is opened.
- */
-export function renderedPostPath(slug: string, cwd: string = process.cwd()): string {
-	return join(cwd, RENDERED_DIR, `${slug}.html`);
-}
-
-/**
  * Every published post, newest first.
  *
- * A notebook is published once Quarto has rendered it into `static/posts/`; unrendered
- * drafts are skipped so the index, sitemap and RSS can never link to a 404.
- * `_`-prefixed notebooks (e.g. `_template.ipynb`) are ignored by Quarto and by us.
+ * `publishedSlugs` (see `post-files.js`) decides what counts as published; the build guard
+ * reads the same function, so the two can never check different sets of posts.
  */
 export function getPosts(cwd: string = process.cwd()): Post[] {
-	const notebookDir = join(cwd, NOTEBOOK_DIR);
-	if (!existsSync(notebookDir)) return [];
-
-	const posts = readdirSync(notebookDir)
-		.filter((file) => file.endsWith('.ipynb') && !file.startsWith('_') && !file.startsWith('.'))
-		.map((file) => file.slice(0, -'.ipynb'.length))
-		.filter((slug) => existsSync(renderedPostPath(slug, cwd)))
-		.map((slug) => toPost(slug, readFrontmatter(join(notebookDir, `${slug}.ipynb`))));
+	const posts = publishedSlugs(cwd).map((slug) =>
+		toPost(slug, readFrontmatter(notebookPath(slug, cwd)))
+	);
 
 	return sortPosts(posts);
-}
-
-export function getPost(slug: string, cwd: string = process.cwd()): Post | undefined {
-	return getPosts(cwd).find((post) => post.slug === slug);
 }

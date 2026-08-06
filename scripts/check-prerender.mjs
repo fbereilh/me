@@ -8,9 +8,10 @@
  *
  * Usage: node scripts/check-prerender.mjs   (after `npm run build`)
  */
-import { readFileSync, readdirSync, existsSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { parse } from 'node-html-parser';
+import { publishedSlugs, templatePath } from '../src/lib/post-files.js';
 
 const PRERENDERED = join(process.cwd(), 'build', 'prerendered');
 const failures = [];
@@ -41,12 +42,21 @@ if (!existsSync(PRERENDERED)) {
 	process.exit(1);
 }
 
-const slugs = readdirSync(join(process.cwd(), 'nbs'))
-	.filter((file) => file.endsWith('.ipynb') && !file.startsWith('_'))
-	.map((file) => file.slice(0, -'.ipynb'.length))
-	.filter((slug) => existsSync(join(process.cwd(), 'static', 'posts', `${slug}.html`)));
+const slugs = publishedSlugs();
 
 check(slugs.length > 0, 'No published posts found in nbs/ - expected at least one.');
+
+/**
+ * The description `scripts/new_post.py` seeds a new notebook with. Read from the template
+ * rather than pinned here, so it cannot drift: a post that still carries it never had its
+ * blurb written, and that placeholder would ship as the page description, the blog-index
+ * card and the RSS item.
+ */
+const templateSource = existsSync(templatePath()) ? readFileSync(templatePath(), 'utf-8') : '';
+
+function isPlaceholderDescription(description) {
+	return Boolean(description) && templateSource.includes(description);
+}
 
 for (const slug of slugs) {
 	const page = join(PRERENDERED, 'blog', `${slug}.html`);
@@ -58,8 +68,13 @@ for (const slug of slugs) {
 	const html = readFileSync(page, 'utf-8');
 	const title = html.match(/<title>([\s\S]*?)<\/title>/)?.[1]?.trim();
 	const canonical = html.match(/<link rel="canonical" href="([^"]*)"/)?.[1];
+	const description = html.match(/<meta name="description" content="([^"]*)"/)?.[1]?.trim();
 
 	check(Boolean(title), `${slug}: prerendered page has no <title>`);
+	check(
+		!isPlaceholderDescription(description),
+		`${slug}: still ships the template's placeholder description - write a real one in the notebook frontmatter`
+	);
 	check(
 		canonical === `${SITE_URL}/blog/${slug}`,
 		`${slug}: canonical is "${canonical}", expected the post's own URL`
