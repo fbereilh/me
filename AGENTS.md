@@ -78,6 +78,21 @@ both sides, so an apostrophe or a dash never trips it), when it ships a cell-out
 and when the adapter-node server manifest comes out with no route nodes (see the sharp edges
 below).
 
+CI does not run any of these: `npm test`, `npm run lint` and `npm run test:prerender` are
+local-only today.
+
+## CI
+
+`.github/workflows/render-quarto.yml` is the only workflow. On a push to `main` that touches
+`nbs/**` it strips notebook metadata with `nbstripout --keep-output`, runs `quarto render`,
+and commits whatever changed under `static/posts/` back to the branch as
+`chore: render notebooks [skip ci]`. So a rendered-HTML change you forgot to commit locally
+gets healed on `main`. (It also runs on pull requests touching `nbs/**` and on manual
+dispatch.)
+
+This does not contradict the authored-once stance: the workflow renders, it does not execute
+notebook cells, so the outputs saved in the notebook are still exactly what gets published.
+
 ## Sharp edges
 
 - Quarto silently finds **no input files** when the repo lives under a hidden directory (any
