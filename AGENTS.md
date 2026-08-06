@@ -64,8 +64,9 @@ npm run test:prerender # build, then assert every post ships a real static page
 
 `scripts/check-prerender.mjs` is the guard against the blog regressing to client-side
 fetch-and-inject, which shipped empty pages to crawlers. It also fails the build when a post
-ships source listings with no syntax-highlighting stylesheet, and when the adapter-node
-server manifest comes out with no route nodes (see the catch-all note below).
+ships source listings with no syntax-highlighting stylesheet, when its frontmatter has drifted
+from the committed rendered HTML, when it ships a cell-output script, and when the adapter-node
+server manifest comes out with no route nodes (see the sharp edges below).
 
 ## Sharp edges
 
@@ -74,6 +75,15 @@ server manifest comes out with no route nodes (see the catch-all note below).
   then exits 0 having done nothing. Render from a normal path, or copy `nbs/` out to render.
 - A post is "published" only once its rendered HTML exists in `static/posts/`. `posts.ts`
   filters on that, so the index, sitemap and RSS can never link to a 404.
+- **Editing the frontmatter means re-rendering.** Metadata comes from the notebook but the
+  body comes from the committed HTML, so an unrendered edit prerenders a fresh title over a
+  stale body. `npm run test:prerender` compares the notebook's `title`, `date` and
+  `description` against the rendered page's and fails until you run `quarto render` again.
+- An **interactive figure** (plotly, altair, bokeh, ipywidgets) does not work yet: `extractPost`
+  keeps the cell output's own script but carries no library bundle from Quarto's `<head>`, so
+  the figure would render as an empty container. The build guard fails on the first one rather
+  than shipping it silently. Publish a static image, or teach `src/lib/post-html.ts` to carry
+  the head scripts across.
 - Per-page `<title>`/canonical/OG come from `seo` returned by a route's `load` and are emitted
   once by `<Seo />` in `src/routes/+layout.svelte`. Do not add `<title>` to a page component;
   you will get two.

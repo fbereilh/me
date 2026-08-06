@@ -1,5 +1,6 @@
 import { readFileSync, statSync } from 'node:fs';
 import {
+	normaliseDate,
 	notebookPath,
 	parseNotebookFrontmatter,
 	publishedSlugs,
@@ -38,41 +39,6 @@ const dateFormatter = new Intl.DateTimeFormat('en-US', {
 	day: 'numeric',
 	timeZone: 'UTC'
 });
-
-const ISO_DATE_ONLY = /^\d{4}-\d{2}-\d{2}$/;
-const HAS_EXPLICIT_ZONE = /(?:Z|[+-]\d{2}:?\d{2})$/i;
-
-/** The calendar day a `Date` falls on, read in UTC or in the build machine's zone. */
-function calendarDay(date: Date, inUtc: boolean): string {
-	const year = inUtc ? date.getUTCFullYear() : date.getFullYear();
-	const month = inUtc ? date.getUTCMonth() : date.getMonth();
-	const day = inUtc ? date.getUTCDate() : date.getDate();
-	return new Date(Date.UTC(year, month, day)).toISOString().slice(0, 10);
-}
-
-/**
- * Normalise a frontmatter `date` to ISO `YYYY-MM-DD`, or `''` when unusable.
- *
- * A frontmatter date is a calendar day, not an instant, so it must normalise to the same
- * day on every build machine. `YYYY-MM-DD` passes straight through. Anything carrying an
- * explicit UTC offset is read in UTC; anything else (`February 10, 2026`, `02/10/2026`)
- * is parsed by the engine as local time, so its day is read locally too - reading it in
- * UTC would shift it a day backwards in every zone east of Greenwich.
- */
-function normaliseDate(value: unknown): string {
-	if (value instanceof Date) {
-		return Number.isNaN(value.getTime()) ? '' : calendarDay(value, true);
-	}
-	if (typeof value !== 'string' && typeof value !== 'number') return '';
-	const raw = String(value).trim();
-	if (!raw) return '';
-	const parsed = new Date(raw);
-	if (Number.isNaN(parsed.getTime())) return '';
-	// A date-only ISO string parses as UTC, so a roundtrip that comes back unchanged proves
-	// the day exists - `2026-02-31` silently rolls forward instead of failing to parse.
-	if (ISO_DATE_ONLY.test(raw)) return calendarDay(parsed, true) === raw ? raw : '';
-	return calendarDay(parsed, HAS_EXPLICIT_ZONE.test(raw));
-}
 
 function normaliseCategories(value: unknown): string[] {
 	if (Array.isArray(value)) {

@@ -22,6 +22,12 @@ const RENDERED = `<!DOCTYPE html>
 <a href="a-post_files/report.html">an asset that happens to be html</a>
 <script>window.quartoThing()</script>
 <button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button>
+<div class="cell">
+<div class="cell-output cell-output-display">
+<div id="figure-1"></div>
+<script type="text/javascript">Plotly.newPlot('figure-1', [])</script>
+</div>
+</div>
 </main>
 </body></html>`;
 
@@ -56,6 +62,10 @@ describe('extractPost', () => {
 	it('drops markup that has nothing to wire it up here', () => {
 		expect(post.html).not.toContain('quartoThing');
 		expect(post.html).not.toContain('code-copy-button');
+	});
+
+	it("keeps a cell output's own script rather than emptying the figure", () => {
+		expect(post.html).toContain("Plotly.newPlot('figure-1', [])");
 	});
 
 	it('carries the inline head CSS across', () => {

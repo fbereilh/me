@@ -17,6 +17,15 @@ const WORDS_PER_MINUTE = 200;
 /** Source listings and cell outputs are not read at prose speed, so they do not count. */
 const NON_PROSE_SELECTOR = 'div.sourceCode, .cell-output';
 
+/**
+ * Where a script that belongs to a cell's output lives.
+ *
+ * Quarto wraps every executed cell in `div.cell`, so the JS half of a figure (plotly, altair,
+ * bokeh, ipywidgets) is always inside one. Any other script in `<main>` is Quarto's own page
+ * chrome - clipboard, tippy, anchors, the `quarto.js` wiring - which is not loaded here.
+ */
+const CELL_OUTPUT_SELECTOR = '.cell, .cell-output, .cell-output-display';
+
 const ABSOLUTE_URL = /^(?:[a-z][a-z0-9+.-]*:|\/\/|\/|#)/i;
 
 /** A bare `slug.html`, optionally followed by a query or fragment. */
@@ -80,8 +89,13 @@ export function extractPost(
 	main.querySelector('#title-block-header')?.remove();
 	// Quarto's own scripts (clipboard, tooltips, anchors) are not loaded here, so drop the
 	// markup that only exists to be wired up by them - an unwired copy button renders as a
-	// stray dot next to every code block.
-	main.querySelectorAll('script, .code-copy-button').forEach((node) => node.remove());
+	// stray dot next to every code block. A script inside a cell is that cell's output, not
+	// chrome, so it stays; `scripts/check-prerender.mjs` fails the build on the first one,
+	// because its library bundle still lives in a `<head>` we do not carry across.
+	main.querySelectorAll('script').forEach((node) => {
+		if (!node.closest(CELL_OUTPUT_SELECTOR)) node.remove();
+	});
+	main.querySelectorAll('.code-copy-button').forEach((node) => node.remove());
 
 	for (const attribute of ['src', 'data-src', 'poster']) {
 		for (const node of main.querySelectorAll(`[${attribute}]`)) {

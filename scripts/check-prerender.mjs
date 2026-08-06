@@ -6,8 +6,10 @@
  * link unfurlers actually received was an empty shell. This check fails the build if
  * that ever comes back. On top of that it asserts what a post is only worth shipping
  * with: its own title, canonical and description (never the template's placeholder), a
- * non-empty body, a highlighting stylesheet whenever it ships source listings, an entry
- * in the sitemap and the RSS feed, and a server manifest that can still render a 404.
+ * non-empty body, a highlighting stylesheet whenever it ships source listings, frontmatter
+ * still in sync with the committed rendered HTML, no cell-output script whose library never
+ * comes across, an entry in the sitemap and the RSS feed, and a server manifest that can
+ * still render a 404.
  *
  * Usage: node scripts/check-prerender.mjs   (after `npm run build`)
  */
@@ -15,7 +17,14 @@ import { readFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { parse } from 'node-html-parser';
-import { placeholderDescription, publishedSlugs } from '../src/lib/post-files.js';
+import {
+	normaliseDate,
+	notebookPath,
+	parseNotebookFrontmatter,
+	placeholderDescription,
+	publishedSlugs,
+	renderedPostPath
+} from '../src/lib/post-files.js';
 
 const PRERENDERED = join(process.cwd(), 'build', 'prerendered');
 const SERVER_MANIFEST = join(process.cwd(), 'build', 'server', 'manifest.js');
@@ -50,6 +59,42 @@ if (!existsSync(PRERENDERED)) {
 const slugs = publishedSlugs();
 
 check(slugs.length > 0, 'No published posts found in nbs/ - expected at least one.');
+
+/**
+ * A post's metadata comes from its notebook frontmatter and its body from the committed
+ * `static/posts/<slug>.html`, so the two can disagree: edit the frontmatter without
+ * re-rendering and the site prerenders a fresh title over a stale body.
+ *
+ * Only the metadata Quarto writes into its own `<head>` is compared - title, date and
+ * description. The rendered body is deliberately not checked: it carries cell ids and
+ * execution artefacts that churn on every render for reasons an author cannot act on.
+ */
+function checkMetadataInSync(slug) {
+	const frontmatter = parseNotebookFrontmatter(readFileSync(notebookPath(slug), 'utf-8'));
+	const rendered = parse(readFileSync(renderedPostPath(slug), 'utf-8'));
+	const head = (selector, attribute) =>
+		(attribute
+			? rendered.querySelector(selector)?.getAttribute(attribute)
+			: rendered.querySelector(selector)?.textContent
+		)?.trim() ?? '';
+
+	const text = (value) => (typeof value === 'string' ? value.trim() : '');
+	const stale = (field, written, renderedValue) =>
+		check(
+			written === renderedValue,
+			`${slug}: notebook ${field} is "${written}" but static/posts/${slug}.html was rendered with "${renderedValue}" - run "quarto render" and commit the result`
+		);
+
+	if (frontmatter?.title !== undefined) {
+		stale('title', text(frontmatter.title), head('title'));
+	}
+	stale(
+		'date',
+		normaliseDate(frontmatter?.date),
+		normaliseDate(head('meta[name="dcterms.date"]', 'content'))
+	);
+	stale('description', text(frontmatter?.description), head('meta[name="description"]', 'content'));
+}
 
 /**
  * The blurb `scripts/new_post.py` seeds a new notebook with, read from the template itself
@@ -108,6 +153,16 @@ for (const slug of slugs) {
 		!body?.querySelector('div.sourceCode') || highlighted,
 		`${slug}: ships source listings but no syntax-highlighting stylesheet - check the asset name extractPost matches in src/lib/post-html.ts against what Quarto now emits`
 	);
+
+	// `extractPost` keeps a script that belongs to a cell output, but carries no `<head>`
+	// scripts across, so the library it calls into is not on the page. Rather than shipping an
+	// empty figure container with a green build, stop here and make it a deliberate decision.
+	check(
+		!body?.querySelector('script'),
+		`${slug}: ships a cell-output script, but extractPost carries no library bundle from Quarto's <head> - an interactive figure (plotly, altair, bokeh, ipywidgets) would render as an empty container. Teach src/lib/post-html.ts to carry that post's head scripts across, or publish the figure as a static image`
+	);
+
+	checkMetadataInSync(slug);
 }
 
 for (const file of ['sitemap.xml', 'rss.xml']) {
