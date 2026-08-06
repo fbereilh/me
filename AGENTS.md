@@ -71,6 +71,11 @@ fetch-and-inject, which shipped empty pages to crawlers.
 - Per-page `<title>`/canonical/OG come from `seo` returned by a route's `load` and are emitted
   once by `<Seo />` in `src/routes/+layout.svelte`. Do not add `<title>` to a page component;
   you will get two.
+- `prerender = true` is declared **per route**, never on the root layout, and
+  `src/routes/[...catchall]/+page.ts` deliberately stays server-rendered. Prerendering
+  everything leaves adapter-node with an empty server manifest, and an unmatched URL then
+  crashes instead of rendering `+error.svelte`. The catch-all is what keeps the layout and
+  error nodes in the manifest, so a real 404 page ships.
 
 ## Maintaining this file
 
