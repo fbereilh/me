@@ -1,4 +1,4 @@
-import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { parse as parseYaml } from 'yaml';
 
@@ -74,15 +74,39 @@ export function parseNotebookFrontmatter(notebookSource: string): Frontmatter | 
 	return null;
 }
 
-/** Normalise a frontmatter `date` to ISO `YYYY-MM-DD`, or `''` when unusable. */
+const ISO_DATE_ONLY = /^\d{4}-\d{2}-\d{2}$/;
+const HAS_EXPLICIT_ZONE = /(?:Z|[+-]\d{2}:?\d{2})$/i;
+
+/** The calendar day a `Date` falls on, read in UTC or in the build machine's zone. */
+function calendarDay(date: Date, inUtc: boolean): string {
+	const year = inUtc ? date.getUTCFullYear() : date.getFullYear();
+	const month = inUtc ? date.getUTCMonth() : date.getMonth();
+	const day = inUtc ? date.getUTCDate() : date.getDate();
+	return new Date(Date.UTC(year, month, day)).toISOString().slice(0, 10);
+}
+
+/**
+ * Normalise a frontmatter `date` to ISO `YYYY-MM-DD`, or `''` when unusable.
+ *
+ * A frontmatter date is a calendar day, not an instant, so it must normalise to the same
+ * day on every build machine. `YYYY-MM-DD` passes straight through. Anything carrying an
+ * explicit UTC offset is read in UTC; anything else (`February 10, 2026`, `02/10/2026`)
+ * is parsed by the engine as local time, so its day is read locally too - reading it in
+ * UTC would shift it a day backwards in every zone east of Greenwich.
+ */
 function normaliseDate(value: unknown): string {
-	if (value instanceof Date) return value.toISOString().slice(0, 10);
+	if (value instanceof Date) {
+		return Number.isNaN(value.getTime()) ? '' : calendarDay(value, true);
+	}
 	if (typeof value !== 'string' && typeof value !== 'number') return '';
 	const raw = String(value).trim();
 	if (!raw) return '';
 	const parsed = new Date(raw);
 	if (Number.isNaN(parsed.getTime())) return '';
-	return parsed.toISOString().slice(0, 10);
+	// A date-only ISO string parses as UTC, so a roundtrip that comes back unchanged proves
+	// the day exists - `2026-02-31` silently rolls forward instead of failing to parse.
+	if (ISO_DATE_ONLY.test(raw)) return calendarDay(parsed, true) === raw ? raw : '';
+	return calendarDay(parsed, HAS_EXPLICIT_ZONE.test(raw));
 }
 
 function normaliseCategories(value: unknown): string[] {
@@ -117,6 +141,25 @@ export function sortPosts(posts: Post[]): Post[] {
 	});
 }
 
+const frontmatterCache = new Map<string, { mtimeMs: number; frontmatter: Frontmatter | null }>();
+
+/**
+ * Parse a notebook's frontmatter, reusing the last result while the file is unchanged.
+ *
+ * `getPosts()` runs several times per build (prerender entries, each post's load, the blog
+ * index, the sitemap, the RSS feed) and notebooks carry their saved outputs, so they are
+ * large. Keying on mtime keeps the dev server honest when a notebook is edited.
+ */
+function readFrontmatter(path: string): Frontmatter | null {
+	const { mtimeMs } = statSync(path);
+	const cached = frontmatterCache.get(path);
+	if (cached?.mtimeMs === mtimeMs) return cached.frontmatter;
+
+	const frontmatter = parseNotebookFrontmatter(readFileSync(path, 'utf-8'));
+	frontmatterCache.set(path, { mtimeMs, frontmatter });
+	return frontmatter;
+}
+
 /**
  * Every published post, newest first.
  *
@@ -132,12 +175,7 @@ export function getPosts(cwd: string = process.cwd()): Post[] {
 		.filter((file) => file.endsWith('.ipynb') && !file.startsWith('_') && !file.startsWith('.'))
 		.map((file) => file.slice(0, -'.ipynb'.length))
 		.filter((slug) => existsSync(join(cwd, RENDERED_DIR, `${slug}.html`)))
-		.map((slug) =>
-			toPost(
-				slug,
-				parseNotebookFrontmatter(readFileSync(join(notebookDir, `${slug}.ipynb`), 'utf-8'))
-			)
-		);
+		.map((slug) => toPost(slug, readFrontmatter(join(notebookDir, `${slug}.ipynb`))));
 
 	return sortPosts(posts);
 }

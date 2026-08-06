@@ -27,14 +27,15 @@ Without devbox: `python3 scripts/new_post.py "Your Post Title"`, then `cd nbs &&
   page's `<title>`, description and title block; `src/lib/posts.ts` reads the same bytes for
   the blog index, sitemap and RSS. Never delete it, never convert it to another cell type,
   never run it, and never put prose in it.
-- **`categories` must be flow style**: `categories: [agents, langchain]`, on one line.
+- **Prefer flow style for `categories`**: `categories: [agents, langchain]`, on one line.
+  Block style parses fine either way; one line just keeps the frontmatter cell short.
 - **No `# Heading` repeating the title** in the body. Quarto already renders the title from
   frontmatter and the post page renders its own header - a markdown `#` duplicate gives the
   page two `<h1>`s.
 - **Hide setup code with `#| echo: false`** as the first line of the code cell. Do not use an
   editor's hide-input toggle; that lives in cell metadata Quarto does not honour here.
-- **When adding cells, pass `route_imports: false`.** Imports belong in the cell where the
-  prose introduces them, not hoisted to the top.
+- **Imports belong in the cell where the prose introduces them**, not hoisted to the top of
+  the notebook. (With cellar, that means passing `route_imports: false` when adding a cell.)
 - **Posts are authored-once snapshots.** Quarto publishes the outputs saved in the notebook
   and CI does not re-execute anything. If an output is wrong, fix it by running the cell
   yourself and saving.

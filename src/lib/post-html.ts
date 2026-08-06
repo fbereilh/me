@@ -8,11 +8,14 @@ export interface RenderedPost {
 	css: string;
 	/** Quarto's syntax highlighting stylesheet, as a site-absolute URL. */
 	stylesheets: string[];
-	/** Estimated reading time in whole minutes, minimum 1. */
+	/** Estimated reading time of the prose in whole minutes, minimum 1. */
 	readingTimeMinutes: number;
 }
 
 const WORDS_PER_MINUTE = 200;
+
+/** Source listings and cell outputs are not read at prose speed, so they do not count. */
+const NON_PROSE_SELECTOR = 'div.sourceCode, .cell-output';
 
 /** `foo_files/bar.png` -> `/posts/foo_files/bar.png`; absolute and external URLs are left alone. */
 function toPostAssetUrl(value: string): string {
@@ -73,10 +76,14 @@ export function extractPost(renderedHtml: string): RenderedPost {
 		);
 	}
 
-	const words = main.textContent.trim().split(/\s+/).filter(Boolean).length;
+	const html = main.innerHTML;
+
+	const prose = parse(html);
+	prose.querySelectorAll(NON_PROSE_SELECTOR).forEach((node) => node.remove());
+	const words = prose.textContent.trim().split(/\s+/).filter(Boolean).length;
 
 	return {
-		html: main.innerHTML,
+		html,
 		css,
 		stylesheets,
 		readingTimeMinutes: Math.max(1, Math.round(words / WORDS_PER_MINUTE))

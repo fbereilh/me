@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { error } from '@sveltejs/kit';
 import { extractPost } from '$lib/post-html';
-import { getPosts } from '$lib/posts';
+import { getPost, getPosts } from '$lib/posts';
 import type { EntryGenerator, PageServerLoad } from './$types';
 
 export const prerender = true;
@@ -11,7 +11,7 @@ export const prerender = true;
 export const entries: EntryGenerator = () => getPosts().map(({ slug }) => ({ slug }));
 
 export const load: PageServerLoad = ({ params }) => {
-	const post = getPosts().find(({ slug }) => slug === params.slug);
+	const post = getPost(params.slug);
 	if (!post) throw error(404, `No post named "${params.slug}"`);
 
 	let renderedHtml: string;

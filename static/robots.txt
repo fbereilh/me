@@ -1,4 +1,10 @@
 User-agent: *
 Allow: /
 
+# Quarto's standalone pages are the source the /blog/<slug> pages are built from, not
+# destinations. Keeping them out of the index stops them competing with the canonical URL.
+# Their sibling /posts/<slug>_files/ assets stay crawlable - the canonical pages load
+# images and the syntax highlighting stylesheet from there.
+Disallow: /posts/*.html$
+
 Sitemap: https://fbereilh.com/sitemap.xml

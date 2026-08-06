@@ -10,9 +10,27 @@
  */
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
+import { parse } from 'node-html-parser';
 
 const PRERENDERED = join(process.cwd(), 'build', 'prerendered');
 const failures = [];
+
+/**
+ * `src/lib/site.ts` owns the canonical origin. This script is plain node run after the
+ * build, so it cannot resolve the `$lib` alias - read the one constant out of the source
+ * instead of pinning a second copy of the domain here.
+ */
+function siteUrl() {
+	const source = readFileSync(join(process.cwd(), 'src', 'lib', 'site.ts'), 'utf-8');
+	const match = source.match(/export const SITE_URL\s*=\s*['"]([^'"]+)['"]/);
+	if (!match) {
+		console.error('Could not read SITE_URL from src/lib/site.ts.');
+		process.exit(1);
+	}
+	return match[1].replace(/\/$/, '');
+}
+
+const SITE_URL = siteUrl();
 
 function check(condition, message) {
 	if (!condition) failures.push(message);
@@ -43,13 +61,16 @@ for (const slug of slugs) {
 
 	check(Boolean(title), `${slug}: prerendered page has no <title>`);
 	check(
-		canonical === `https://fbereilh.com/blog/${slug}`,
+		canonical === `${SITE_URL}/blog/${slug}`,
 		`${slug}: canonical is "${canonical}", expected the post's own URL`
 	);
 	check(!html.includes('>Loading...<'), `${slug}: prerendered page still ships a loading shell`);
+
+	const body = parse(html).querySelector('.post-content');
+	check(Boolean(body), `${slug}: prerendered page has no .post-content element`);
 	check(
-		html.includes('class="post-content"') && html.length > 10_000,
-		`${slug}: prerendered page has no post body (${html.length} bytes)`
+		Boolean(body?.textContent.trim()),
+		`${slug}: prerendered page ships an empty .post-content`
 	);
 }
 

@@ -72,6 +72,22 @@ describe('toPost', () => {
 		expect(post.displayDate).toBe('February 10, 2026');
 	});
 
+	it('keeps the written calendar day for a non-ISO date, whatever the build zone', () => {
+		expect(toPost('s', { date: 'February 10, 2026' }).date).toBe('2026-02-10');
+		expect(toPost('s', { date: '02/10/2026' }).date).toBe('2026-02-10');
+		expect(toPost('s', { date: 'February 10, 2026' }).displayDate).toBe('February 10, 2026');
+	});
+
+	it('reads a date carrying an explicit UTC offset in UTC', () => {
+		expect(toPost('s', { date: '2026-02-10T23:30:00Z' }).date).toBe('2026-02-10');
+		expect(toPost('s', { date: new Date('2026-02-10T00:00:00Z') }).date).toBe('2026-02-10');
+	});
+
+	it('drops a date it cannot parse', () => {
+		expect(toPost('s', { date: 'sometime last spring' }).date).toBe('');
+		expect(toPost('s', { date: '2026-02-31' }).date).toBe('');
+	});
+
 	it('falls back to the slug and an unknown date', () => {
 		const post = toPost('a-post', null);
 		expect(post).toMatchObject({

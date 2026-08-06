@@ -57,3 +57,23 @@ describe('extractPost', () => {
 		expect(post.readingTimeMinutes).toBeGreaterThanOrEqual(1);
 	});
 });
+
+describe('extractPost reading time', () => {
+	const prose = (words: number) => `<p>${'word '.repeat(words).trim()}</p>`;
+	const page = (body: string) => `<html><body><main>${body}</main></body></html>`;
+
+	it('counts prose', () => {
+		expect(extractPost(page(prose(2000))).readingTimeMinutes).toBe(10);
+	});
+
+	it('does not count source listings or cell outputs at prose speed', () => {
+		const codeHeavy = page(`
+			${prose(400)}
+			<div class="cell">
+				<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python"><code>${'token '.repeat(3000)}</code></pre></div>
+				<div class="cell-output cell-output-stdout"><pre><code>${'output '.repeat(3000)}</code></pre></div>
+			</div>
+		`);
+		expect(extractPost(codeHeavy).readingTimeMinutes).toBe(2);
+	});
+});
