@@ -26,7 +26,9 @@ Without devbox: `python3 scripts/new_post.py "Your Post Title"`, then `cd nbs &&
   block (`title`, `author`, `date`, `categories`, `description`). Quarto reads it to build the
   page's `<title>`, description and title block; `src/lib/posts.ts` reads the same bytes for
   the blog index, sitemap and RSS. Never delete it, never convert it to another cell type,
-  never run it, and never put prose in it.
+  never run it, and never put prose in it. Only the first markdown-or-raw cell is read: if
+  the fence is not there the parser stops rather than scanning on, and the post ships with
+  its slug as the title and no date.
 - **Prefer flow style for `categories`**: `categories: [agents, langchain]`, on one line.
   Block style parses fine either way; one line just keeps the frontmatter cell short.
 - **No `# Heading` repeating the title** in the body. Quarto already renders the title from
@@ -44,7 +46,9 @@ Without devbox: `python3 scripts/new_post.py "Your Post Title"`, then `cd nbs &&
   yourself and saving.
 - **Before publishing**: replace the template's placeholder `description` with a real blurb
   and fill in `categories`, then clear outputs, run all, save, `quarto render`, and actually
-  look at the rendered page. `npm run test:prerender` fails on a leftover placeholder.
+  look at the rendered page. `npm run test:prerender` fails on a leftover placeholder and on
+  a missing one: a post with no `description` ships no description meta tags at all, because
+  a post never borrows the site blurb.
 
 `_`-prefixed notebooks (`nbs/_template.ipynb`) are ignored by Quarto and by `posts.ts`, so the
 template is never published.
@@ -54,7 +58,7 @@ template is never published.
 ```
 npm run check          # svelte-check
 npm run lint           # prettier --check
-npm test               # vitest (posts.ts parsing/sorting, post HTML extraction)
+npm test               # vitest (frontmatter parsing/sorting, post HTML extraction, head tags, RSS)
 npm run test:prerender # build, then assert every post ships a real static page
 ```
 
