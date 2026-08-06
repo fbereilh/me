@@ -19,4 +19,11 @@ export interface SeoData {
 	type?: 'website' | 'article';
 	canonical?: string;
 	publishedAt?: string;
+	/** Keep the page out of search results and emit no canonical or social tags. */
+	noindex?: boolean;
+}
+
+/** What an error page calls itself. Shared so its `<h1>` and its `<title>` cannot drift apart. */
+export function errorHeading(status: number): string {
+	return status === 404 ? 'Page not found' : 'Something went wrong';
 }

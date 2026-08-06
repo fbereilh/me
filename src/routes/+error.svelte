@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { page } from '$app/state';
+	import { errorHeading } from '$lib/site';
 
-	const heading = $derived(page.status === 404 ? 'Page not found' : 'Something went wrong');
+	const heading = $derived(errorHeading(page.status));
 	const message = $derived(
 		page.status === 404
 			? "That page doesn't exist - it may have moved, or never existed at all."

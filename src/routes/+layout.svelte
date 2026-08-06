@@ -4,13 +4,18 @@
 	import Footer from '$lib/components/Footer.svelte';
 	import NavBar from '$lib/components/NavBar.svelte';
 	import Seo from '$lib/components/Seo.svelte';
-	import type { SeoData } from '$lib/site';
+	import { errorHeading, SITE_AUTHOR, type SeoData } from '$lib/site';
 
 	let { children } = $props();
 
 	// Routes describe themselves by returning `seo` from their load function, so the whole
-	// site emits exactly one set of head tags, from one place.
-	const seo = $derived((page.data.seo ?? {}) as SeoData);
+	// site emits exactly one set of head tags, from one place. An error page has no `load`
+	// data to describe it, and must not describe itself as the route it failed to be.
+	const seo = $derived(
+		page.status >= 400
+			? { title: `${errorHeading(page.status)} - ${SITE_AUTHOR}`, noindex: true }
+			: ((page.data.seo ?? {}) as SeoData)
+	);
 </script>
 
 <svelte:head>

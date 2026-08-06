@@ -15,13 +15,17 @@ const RENDERED = `<!DOCTYPE html>
 <img src="a-post_files/figure-html/cell-1.png" srcset="a-post_files/small.png 1x, a-post_files/big.png 2x">
 <a href="https://example.com">external</a>
 <a href="/blog">internal</a>
+<a href="another-post.html">sibling notebook</a>
+<a href="another-post.html#section">sibling notebook anchor</a>
+<a href="not-a-post.html">unpublished sibling</a>
+<a href="a-post_files/report.html">an asset that happens to be html</a>
 <script>window.quartoThing()</script>
 <button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button>
 </main>
 </body></html>`;
 
 describe('extractPost', () => {
-	const post = extractPost(RENDERED);
+	const post = extractPost(RENDERED, { postSlugs: ['a-post', 'another-post'] });
 
 	it('returns the body of <main> without the Quarto title block', () => {
 		expect(post.html).toContain('Body text goes here.');
@@ -36,6 +40,16 @@ describe('extractPost', () => {
 		);
 		expect(post.html).toContain('href="https://example.com"');
 		expect(post.html).toContain('href="/blog"');
+	});
+
+	it('sends a link to another published post to its /blog page', () => {
+		expect(post.html).toContain('href="/blog/another-post"');
+		expect(post.html).toContain('href="/blog/another-post#section"');
+	});
+
+	it('leaves a page that is not a published post mapped to /posts', () => {
+		expect(post.html).toContain('href="/posts/not-a-post.html"');
+		expect(post.html).toContain('href="/posts/a-post_files/report.html"');
 	});
 
 	it('drops markup that has nothing to wire it up here', () => {

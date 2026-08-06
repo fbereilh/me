@@ -17,10 +17,30 @@ const WORDS_PER_MINUTE = 200;
 /** Source listings and cell outputs are not read at prose speed, so they do not count. */
 const NON_PROSE_SELECTOR = 'div.sourceCode, .cell-output';
 
+const ABSOLUTE_URL = /^(?:[a-z][a-z0-9+.-]*:|\/\/|\/|#)/i;
+
+/** A bare `slug.html`, optionally followed by a query or fragment. */
+const SIBLING_PAGE = /^([^/?#]+)\.html(?=$|[?#])/;
+
 /** `foo_files/bar.png` -> `/posts/foo_files/bar.png`; absolute and external URLs are left alone. */
 function toPostAssetUrl(value: string): string {
-	if (/^(?:[a-z][a-z0-9+.-]*:|\/\/|\/|#)/i.test(value)) return value;
+	if (ABSOLUTE_URL.test(value)) return value;
 	return `/posts/${value}`;
+}
+
+/**
+ * Rewrite a link out of a rendered post.
+ *
+ * Quarto turns a markdown link to a sibling notebook into `other-post.html`. That file does
+ * exist under `/posts/`, but it is the raw standalone Quarto page - no nav, no footer, no
+ * canonical, and disallowed in `robots.txt` - so a cross-post link is sent to the real
+ * `/blog/<slug>` page instead. Anything else is an asset and keeps the `/posts/` mapping.
+ */
+function toPostHref(value: string, postSlugs: ReadonlySet<string>): string {
+	if (ABSOLUTE_URL.test(value)) return value;
+	const match = SIBLING_PAGE.exec(value);
+	if (match && postSlugs.has(match[1])) return `/blog/${match[1]}${value.slice(match[0].length)}`;
+	return toPostAssetUrl(value);
 }
 
 /**
@@ -29,8 +49,16 @@ function toPostAssetUrl(value: string): string {
  * Quarto writes a complete standalone page; we only want what goes inside our own article
  * shell. Its `#title-block-header` is dropped because the post route renders title, date and
  * categories itself from the typed post metadata - keeping it would duplicate the `<h1>`.
+ *
+ * `postSlugs` is the set of published post slugs; links between notebooks resolve to their
+ * `/blog/<slug>` pages instead of the raw rendered HTML.
  */
-export function extractPost(renderedHtml: string): RenderedPost {
+export function extractPost(
+	renderedHtml: string,
+	{ postSlugs = [] }: { postSlugs?: Iterable<string> } = {}
+): RenderedPost {
+	const slugs = new Set(postSlugs);
+
 	const document = parse(renderedHtml, { blockTextElements: { style: true, script: true } });
 
 	const css = document
@@ -55,11 +83,15 @@ export function extractPost(renderedHtml: string): RenderedPost {
 	// stray dot next to every code block.
 	main.querySelectorAll('script, .code-copy-button').forEach((node) => node.remove());
 
-	for (const attribute of ['src', 'href', 'data-src', 'poster']) {
+	for (const attribute of ['src', 'data-src', 'poster']) {
 		for (const node of main.querySelectorAll(`[${attribute}]`)) {
 			const value = node.getAttribute(attribute);
 			if (value) node.setAttribute(attribute, toPostAssetUrl(value));
 		}
+	}
+	for (const node of main.querySelectorAll('[href]')) {
+		const value = node.getAttribute('href');
+		if (value) node.setAttribute('href', toPostHref(value, slugs));
 	}
 	for (const node of main.querySelectorAll('[srcset]')) {
 		const srcset = node.getAttribute('srcset');

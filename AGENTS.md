@@ -36,6 +36,9 @@ Without devbox: `python3 scripts/new_post.py "Your Post Title"`, then `cd nbs &&
   editor's hide-input toggle; that lives in cell metadata Quarto does not honour here.
 - **Imports belong in the cell where the prose introduces them**, not hoisted to the top of
   the notebook. (With cellar, that means passing `route_imports: false` when adding a cell.)
+- **Linking to another post is fine.** Write it as a normal markdown link to the sibling
+  notebook (`[see this](Other-Post.ipynb)`); the extractor resolves the `Other-Post.html`
+  Quarto emits to `/blog/Other-Post`, so the reader lands on the real page.
 - **Posts are authored-once snapshots.** Quarto publishes the outputs saved in the notebook
   and CI does not re-execute anything. If an output is wrong, fix it by running the cell
   yourself and saving.

@@ -20,7 +20,9 @@ export const load: PageServerLoad = ({ params }) => {
 		throw error(404, `"${post.slug}" has not been rendered yet`);
 	}
 
-	const { html, css, stylesheets, readingTimeMinutes } = extractPost(renderedHtml);
+	const { html, css, stylesheets, readingTimeMinutes } = extractPost(renderedHtml, {
+		postSlugs: getPosts().map((published) => published.slug)
+	});
 	return {
 		post,
 		html,
