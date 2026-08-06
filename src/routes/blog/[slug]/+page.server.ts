@@ -1,8 +1,7 @@
 import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
 import { error } from '@sveltejs/kit';
 import { extractPost } from '$lib/post-html';
-import { getPost, getPosts } from '$lib/posts';
+import { getPost, getPosts, renderedPostPath } from '$lib/posts';
 import type { EntryGenerator, PageServerLoad } from './$types';
 
 export const prerender = true;
@@ -16,10 +15,7 @@ export const load: PageServerLoad = ({ params }) => {
 
 	let renderedHtml: string;
 	try {
-		renderedHtml = readFileSync(
-			join(process.cwd(), 'static', 'posts', `${post.slug}.html`),
-			'utf-8'
-		);
+		renderedHtml = readFileSync(renderedPostPath(post.slug), 'utf-8');
 	} catch {
 		throw error(404, `"${post.slug}" has not been rendered yet`);
 	}
@@ -33,7 +29,7 @@ export const load: PageServerLoad = ({ params }) => {
 		readingTimeMinutes,
 		seo: {
 			title: `${post.title} - Felipe Bereilh`,
-			description: post.description,
+			description: post.description || undefined,
 			type: 'article' as const,
 			publishedAt: post.date || undefined
 		}

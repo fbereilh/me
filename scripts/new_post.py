@@ -29,9 +29,21 @@ def slugify(title: str) -> str:
     return "-".join(words)
 
 
+def yaml_escape(title: str) -> str:
+    """Escape a title for the template's double-quoted YAML scalar.
+
+    `He said "hi" \\o/` has to survive as YAML, or Quarto refuses to render the post and
+    the site silently falls back to the slug as its title.
+    """
+    escaped = title.replace("\\", "\\\\").replace('"', '\\"')
+    return escaped.replace("\n", "\\n").replace("\r", "\\r").replace("\t", "\\t")
+
+
 def fill(source: list[str], title: str, published: date) -> list[str]:
     return [
-        line.replace("POST_TITLE", title).replace("POST_DATE", published.isoformat())
+        line.replace("POST_TITLE", yaml_escape(title)).replace(
+            "POST_DATE", published.isoformat()
+        )
         for line in source
     ]
 

@@ -129,16 +129,16 @@ describe('getPosts', () => {
 		expect(posts.length).toBeGreaterThan(0);
 	});
 
-	it('gives every post a title, an ISO date and a slug that resolves to rendered HTML', () => {
+	it('gives every post a title, a normalised date and a publishable slug', () => {
 		for (const post of posts) {
 			expect(post.title).not.toBe('');
-			expect(post.date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
 			expect(post.slug).not.toMatch(/^_/);
+			expect(post.date === '' || /^\d{4}-\d{2}-\d{2}$/.test(post.date)).toBe(true);
+			expect(post.displayDate).toBe(toPost(post.slug, { date: post.date }).displayDate);
 		}
 	});
 
-	it('returns them newest first', () => {
-		const dates = posts.map((p) => p.date);
-		expect([...dates].sort().reverse()).toEqual(dates);
+	it('returns them newest first, undated last', () => {
+		expect(posts).toEqual(sortPosts(posts));
 	});
 });

@@ -51,7 +51,9 @@
 					{:else}
 						<span class="post-date">{post.displayDate}</span>
 					{/if}
-					<p class="post-description">{post.description}</p>
+					{#if post.description}
+						<p class="post-description">{post.description}</p>
+					{/if}
 					{#if post.categories && post.categories.length > 0}
 						<div class="post-tags">
 							{#each post.categories as category}

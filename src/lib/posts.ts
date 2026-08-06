@@ -161,6 +161,16 @@ function readFrontmatter(path: string): Frontmatter | null {
 }
 
 /**
+ * Where Quarto's rendered HTML for a post lives.
+ *
+ * Both the published filter below and the post route's `load` resolve the file through
+ * here, so a post can never pass as published and then 404 when it is opened.
+ */
+export function renderedPostPath(slug: string, cwd: string = process.cwd()): string {
+	return join(cwd, RENDERED_DIR, `${slug}.html`);
+}
+
+/**
  * Every published post, newest first.
  *
  * A notebook is published once Quarto has rendered it into `static/posts/`; unrendered
@@ -174,7 +184,7 @@ export function getPosts(cwd: string = process.cwd()): Post[] {
 	const posts = readdirSync(notebookDir)
 		.filter((file) => file.endsWith('.ipynb') && !file.startsWith('_') && !file.startsWith('.'))
 		.map((file) => file.slice(0, -'.ipynb'.length))
-		.filter((slug) => existsSync(join(cwd, RENDERED_DIR, `${slug}.html`)))
+		.filter((slug) => existsSync(renderedPostPath(slug, cwd)))
 		.map((slug) => toPost(slug, readFrontmatter(join(notebookDir, `${slug}.ipynb`))));
 
 	return sortPosts(posts);
