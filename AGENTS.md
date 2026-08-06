@@ -10,6 +10,11 @@ which is committed. SvelteKit reads both: `src/lib/posts.ts` parses post metadat
 notebook frontmatter, and `src/routes/blog/[slug]/+page.server.ts` lifts the rendered
 `<main>` out of the HTML and prerenders each post as a complete static page.
 
+`src/lib/post-files.js` owns the on-disk rules - which notebooks count as published, how
+frontmatter is found and how its date normalises. It is plain JavaScript on purpose: both
+`posts.ts` and `scripts/check-prerender.mjs` import it, and the guard runs as a bare node
+script after the build, where the `$lib` alias does not resolve.
+
 ## Writing a post
 
 ```
@@ -58,17 +63,20 @@ template is never published.
 ```
 npm run check          # svelte-check
 npm run lint           # prettier --check
-npm test               # vitest (frontmatter parsing/sorting, post HTML extraction, head tags, RSS)
+npm test               # vitest (frontmatter parsing, date normalisation, sorting, metadata
+                       #         drift, post HTML extraction, head tags, RSS)
 npm run test:prerender # build, then assert every post ships a real static page
 ```
 
 `scripts/check-prerender.mjs` is the guard against the blog regressing to client-side
 fetch-and-inject, which shipped empty pages to crawlers. It also fails the build when a post
-ships source listings with no syntax-highlighting stylesheet or with one that is not on disk,
-when its frontmatter has drifted from the committed rendered HTML (title, date and description
-are compared after folding pandoc's smart typography off both sides, so an apostrophe or a dash
-never trips it), when it ships a cell-output script, and when the adapter-node
-server manifest comes out with no route nodes (see the sharp edges below).
+ships without its own title, canonical, description or body, when it is missing from the
+sitemap or the RSS feed, when it ships source listings with no syntax-highlighting stylesheet
+or with one that is not on disk, when its frontmatter has drifted from the committed rendered
+HTML (title, date and description are compared after folding pandoc's smart typography off
+both sides, so an apostrophe or a dash never trips it), when it ships a cell-output script,
+and when the adapter-node server manifest comes out with no route nodes (see the sharp edges
+below).
 
 ## Sharp edges
 
