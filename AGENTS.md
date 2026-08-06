@@ -64,8 +64,10 @@ npm run test:prerender # build, then assert every post ships a real static page
 
 `scripts/check-prerender.mjs` is the guard against the blog regressing to client-side
 fetch-and-inject, which shipped empty pages to crawlers. It also fails the build when a post
-ships source listings with no syntax-highlighting stylesheet, when its frontmatter has drifted
-from the committed rendered HTML, when it ships a cell-output script, and when the adapter-node
+ships source listings with no syntax-highlighting stylesheet or with one that is not on disk,
+when its frontmatter has drifted from the committed rendered HTML (title, date and description
+are compared after folding pandoc's smart typography off both sides, so an apostrophe or a dash
+never trips it), when it ships a cell-output script, and when the adapter-node
 server manifest comes out with no route nodes (see the sharp edges below).
 
 ## Sharp edges

@@ -1,5 +1,6 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { parse as parseHtml } from 'node-html-parser';
 import { parse as parseYaml } from 'yaml';
 
 /**
@@ -126,6 +127,100 @@ export function normaliseDate(value) {
 	// the day exists - `2026-02-31` silently rolls forward instead of failing to parse.
 	if (ISO_DATE_ONLY.test(raw)) return calendarDay(parsed, true) === raw ? raw : '';
 	return calendarDay(parsed, HAS_EXPLICIT_ZONE.test(raw));
+}
+
+/**
+ * Fold a metadata string to the form both sides of a staleness comparison can agree on.
+ *
+ * Frontmatter is YAML source; the rendered `<head>` is what pandoc made of it. Pandoc's `smart`
+ * extension rewrites quotes, dashes and ellipses, and it reads the value as markdown, so a
+ * backticked word arrives as bare prose. Folding is applied to BOTH sides so those rewrites
+ * cancel out and only a genuinely stale render is left: a guard that fails on a perfectly good
+ * post is worse than no guard, because the next author simply deletes it.
+ * @param {unknown} value
+ * @returns {string}
+ */
+export function comparableMetadata(value) {
+	return String(value ?? '')
+		.replace(/[‘’‚‛′]/g, "'")
+		.replace(/[“”„‟″]/g, '"')
+		.replace(/[‒–—―−]/g, '-')
+		.replace(/-+/g, '-')
+		.replace(/…/g, '...')
+		.replace(/[`*_]/g, '')
+		.replace(/\s+/g, ' ')
+		.trim();
+}
+
+/**
+ * A metadata field whose notebook value and rendered value disagree.
+ * @typedef {{ field: string, notebook: string, rendered: string }} MetadataDrift
+ */
+
+/**
+ * Metadata the notebook and its committed rendered HTML disagree on.
+ *
+ * A post's metadata comes from its notebook frontmatter and its body from the committed
+ * `static/posts/<slug>.html`, so the two can drift apart: edit the frontmatter without
+ * re-rendering and the site prerenders a fresh title over a stale body.
+ *
+ * Only the metadata Quarto writes into its own `<head>` is compared - title, date and
+ * description. The rendered body is deliberately not checked: it carries cell ids and
+ * execution artefacts that churn on every render for reasons an author cannot act on.
+ * @param {string} notebookSource
+ * @param {string} renderedHtml
+ * @returns {MetadataDrift[]}
+ */
+export function metadataDrift(notebookSource, renderedHtml) {
+	const frontmatter = parseNotebookFrontmatter(notebookSource);
+	// Read the head through the parser rather than by regex: it decodes the HTML entities
+	// Quarto escapes an apostrophe or an ampersand into.
+	const rendered = parseHtml(renderedHtml);
+	/** @type {MetadataDrift[]} */
+	const drift = [];
+
+	/**
+	 * @param {string} selector
+	 * @param {string} [attribute]
+	 * @returns {string}
+	 */
+	const head = (selector, attribute) =>
+		(attribute
+			? rendered.querySelector(selector)?.getAttribute(attribute)
+			: rendered.querySelector(selector)?.textContent
+		)?.trim() ?? '';
+
+	/**
+	 * @param {string} field
+	 * @param {string} notebook
+	 * @param {string} renderedValue
+	 * @param {(value: string) => string} fold
+	 */
+	const compare = (field, notebook, renderedValue, fold) => {
+		if (fold(notebook) !== fold(renderedValue))
+			drift.push({ field, notebook, rendered: renderedValue });
+	};
+
+	/** @param {unknown} value */
+	const text = (value) => (typeof value === 'string' ? value.trim() : '');
+
+	if (frontmatter?.title !== undefined) {
+		compare('title', text(frontmatter.title), head('title'), comparableMetadata);
+	}
+	compare(
+		'date',
+		normaliseDate(frontmatter?.date),
+		normaliseDate(head('meta[name="dcterms.date"]', 'content')),
+		(value) => value
+	);
+	compare(
+		'description',
+		text(frontmatter?.description),
+		head('meta[name="description"]', 'content'),
+		comparableMetadata
+	);
+
+	return drift;
 }
 
 /**

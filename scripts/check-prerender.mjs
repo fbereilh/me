@@ -6,7 +6,8 @@
  * link unfurlers actually received was an empty shell. This check fails the build if
  * that ever comes back. On top of that it asserts what a post is only worth shipping
  * with: its own title, canonical and description (never the template's placeholder), a
- * non-empty body, a highlighting stylesheet whenever it ships source listings, frontmatter
+ * non-empty body, a highlighting stylesheet that is really on disk whenever it ships source
+ * listings, frontmatter
  * still in sync with the committed rendered HTML, no cell-output script whose library never
  * comes across, an entry in the sitemap and the RSS feed, and a server manifest that can
  * still render a 404.
@@ -18,9 +19,8 @@ import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { parse } from 'node-html-parser';
 import {
-	normaliseDate,
+	metadataDrift,
 	notebookPath,
-	parseNotebookFrontmatter,
 	placeholderDescription,
 	publishedSlugs,
 	renderedPostPath
@@ -28,6 +28,8 @@ import {
 
 const PRERENDERED = join(process.cwd(), 'build', 'prerendered');
 const SERVER_MANIFEST = join(process.cwd(), 'build', 'server', 'manifest.js');
+const CLIENT = join(process.cwd(), 'build', 'client');
+const STATIC = join(process.cwd(), 'static');
 const failures = [];
 
 /**
@@ -61,39 +63,33 @@ const slugs = publishedSlugs();
 check(slugs.length > 0, 'No published posts found in nbs/ - expected at least one.');
 
 /**
- * A post's metadata comes from its notebook frontmatter and its body from the committed
- * `static/posts/<slug>.html`, so the two can disagree: edit the frontmatter without
- * re-rendering and the site prerenders a fresh title over a stale body.
- *
- * Only the metadata Quarto writes into its own `<head>` is compared - title, date and
- * description. The rendered body is deliberately not checked: it carries cell ids and
- * execution artefacts that churn on every render for reasons an author cannot act on.
+ * Fail on metadata the notebook and its committed rendered HTML disagree on: an edited
+ * frontmatter that was never re-rendered prerenders a fresh title over a stale body.
+ * `metadataDrift` owns which fields are compared and how they are folded first.
  */
 function checkMetadataInSync(slug) {
-	const frontmatter = parseNotebookFrontmatter(readFileSync(notebookPath(slug), 'utf-8'));
-	const rendered = parse(readFileSync(renderedPostPath(slug), 'utf-8'));
-	const head = (selector, attribute) =>
-		(attribute
-			? rendered.querySelector(selector)?.getAttribute(attribute)
-			: rendered.querySelector(selector)?.textContent
-		)?.trim() ?? '';
-
-	const text = (value) => (typeof value === 'string' ? value.trim() : '');
-	const stale = (field, written, renderedValue) =>
-		check(
-			written === renderedValue,
-			`${slug}: notebook ${field} is "${written}" but static/posts/${slug}.html was rendered with "${renderedValue}" - run "quarto render" and commit the result`
-		);
-
-	if (frontmatter?.title !== undefined) {
-		stale('title', text(frontmatter.title), head('title'));
-	}
-	stale(
-		'date',
-		normaliseDate(frontmatter?.date),
-		normaliseDate(head('meta[name="dcterms.date"]', 'content'))
+	const drift = metadataDrift(
+		readFileSync(notebookPath(slug), 'utf-8'),
+		readFileSync(renderedPostPath(slug), 'utf-8')
 	);
-	stale('description', text(frontmatter?.description), head('meta[name="description"]', 'content'));
+	for (const { field, notebook, rendered } of drift) {
+		failures.push(
+			`${slug}: notebook ${field} is "${notebook}" but static/posts/${slug}.html was rendered with "${rendered}" - run "quarto render" and commit the result`
+		);
+	}
+}
+
+/**
+ * Whether a site-absolute asset URL out of a prerendered page resolves to a real file.
+ *
+ * The build copies `static/` into `build/client/`, so either location counts. Anything not
+ * site-absolute is external and not ours to vouch for.
+ */
+function assetIsOnDisk(href) {
+	const [path] = href.split(/[?#]/);
+	if (!path.startsWith('/')) return true;
+	const segments = decodeURI(path).split('/').filter(Boolean);
+	return existsSync(join(CLIENT, ...segments)) || existsSync(join(STATIC, ...segments));
 }
 
 /**
@@ -146,13 +142,23 @@ for (const slug of slugs) {
 	// `extractPost` picks Quarto's highlighting stylesheet out of the rendered page by name.
 	// If a Quarto upgrade renames that asset the match quietly yields nothing, so a post full
 	// of code would ship uncoloured with the build still green. Pair the two here instead.
-	const highlighted = document
+	const stylesheets = document
 		.querySelectorAll('link[rel="stylesheet"]')
-		.some((node) => (node.getAttribute('href') ?? '').includes('syntax-highlighting'));
+		.map((node) => node.getAttribute('href') ?? '')
+		.filter((href) => href.includes('syntax-highlighting'));
 	check(
-		!body?.querySelector('div.sourceCode') || highlighted,
+		!body?.querySelector('div.sourceCode') || stylesheets.length > 0,
 		`${slug}: ships source listings but no syntax-highlighting stylesheet - check the asset name extractPost matches in src/lib/post-html.ts against what Quarto now emits`
 	);
+	// A link to a stylesheet that is not on disk leaves the code just as uncoloured as no link
+	// at all, so the reference has to resolve too - Quarto fingerprints that filename, and a
+	// re-render that was not committed alongside the page leaves it dangling.
+	for (const href of stylesheets) {
+		check(
+			assetIsOnDisk(href),
+			`${slug}: links the syntax-highlighting stylesheet "${href}", but no such file ships under static/posts/ - commit the "_files" directory "quarto render" wrote alongside the page`
+		);
+	}
 
 	// `extractPost` keeps a script that belongs to a cell output, but carries no `<head>`
 	// scripts across, so the library it calls into is not on the page. Rather than shipping an
