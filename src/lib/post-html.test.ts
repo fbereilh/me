@@ -12,6 +12,7 @@ const RENDERED = `<!DOCTYPE html>
 <main class="content" id="quarto-document-content">
 <header id="title-block-header"><h1 class="title">A Post</h1></header>
 <p>Body text goes here.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python"><code>print("hi")</code></pre></div>
 <img src="a-post_files/figure-html/cell-1.png" srcset="a-post_files/small.png 1x, a-post_files/big.png 2x">
 <a href="https://example.com">external</a>
 <a href="/blog">internal</a>
@@ -65,6 +66,11 @@ describe('extractPost', () => {
 		expect(post.stylesheets).toEqual([
 			'/posts/a-post_files/libs/quarto-html/quarto-syntax-highlighting-abc.css'
 		]);
+	});
+
+	it('ships a highlighting stylesheet whenever it ships source listings', () => {
+		expect(post.html).toContain('class="sourceCode"');
+		expect(post.stylesheets).not.toHaveLength(0);
 	});
 
 	it('always reports at least one minute of reading', () => {

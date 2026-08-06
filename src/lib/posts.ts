@@ -25,7 +25,6 @@ export interface Post {
 	/** Human readable form of `date`, e.g. `February 10, 2026`. */
 	displayDate: string;
 	categories: string[];
-	author: string;
 }
 
 /** Raw YAML frontmatter of a post notebook, before normalisation. */
@@ -92,8 +91,7 @@ export function toPost(slug: string, frontmatter: Frontmatter | null): Post {
 		description: typeof frontmatter?.description === 'string' ? frontmatter.description : '',
 		date,
 		displayDate: date ? dateFormatter.format(new Date(`${date}T00:00:00Z`)) : UNKNOWN_DATE,
-		categories: normaliseCategories(frontmatter?.categories),
-		author: typeof frontmatter?.author === 'string' ? frontmatter.author : ''
+		categories: normaliseCategories(frontmatter?.categories)
 	};
 }
 

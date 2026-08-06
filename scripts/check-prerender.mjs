@@ -10,10 +10,12 @@
  */
 import { readFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { parse } from 'node-html-parser';
 import { placeholderDescription, publishedSlugs } from '../src/lib/post-files.js';
 
 const PRERENDERED = join(process.cwd(), 'build', 'prerendered');
+const SERVER_MANIFEST = join(process.cwd(), 'build', 'server', 'manifest.js');
 const failures = [];
 
 /**
@@ -92,6 +94,17 @@ for (const slug of slugs) {
 		Boolean(body?.textContent.trim()),
 		`${slug}: prerendered page ships an empty .post-content`
 	);
+
+	// `extractPost` picks Quarto's highlighting stylesheet out of the rendered page by name.
+	// If a Quarto upgrade renames that asset the match quietly yields nothing, so a post full
+	// of code would ship uncoloured with the build still green. Pair the two here instead.
+	const highlighted = document
+		.querySelectorAll('link[rel="stylesheet"]')
+		.some((node) => (node.getAttribute('href') ?? '').includes('syntax-highlighting'));
+	check(
+		!body?.querySelector('div.sourceCode') || highlighted,
+		`${slug}: ships source listings but no syntax-highlighting stylesheet - check the asset name extractPost matches in src/lib/post-html.ts against what Quarto now emits`
+	);
 }
 
 for (const file of ['sitemap.xml', 'rss.xml']) {
@@ -104,6 +117,26 @@ for (const file of ['sitemap.xml', 'rss.xml']) {
 	for (const slug of slugs) {
 		check(xml.includes(`/blog/${slug}`), `${file}: missing /blog/${slug}`);
 	}
+}
+
+/**
+ * The server manifest must still carry route nodes.
+ *
+ * Prerendering every route leaves adapter-node with an empty manifest, and an unmatched URL
+ * then crashes on `manifest._.nodes[0]` instead of rendering `+error.svelte`. The one
+ * server-rendered catch-all route is what keeps the layout and error nodes in there.
+ */
+const CATCHALL_CAUSE =
+	'server manifest carries no route nodes - adapter-node will crash on any unmatched URL ' +
+	'instead of rendering +error.svelte. Keep src/routes/[...catchall]/+page.ts and its ' +
+	'"export const prerender = false", and declare prerender per route, never on the root layout.';
+
+if (!existsSync(SERVER_MANIFEST)) {
+	failures.push(`${SERVER_MANIFEST} is missing - ${CATCHALL_CAUSE}`);
+} else {
+	const { manifest } = await import(pathToFileURL(SERVER_MANIFEST).href);
+	check(manifest?._?.nodes?.length > 0, CATCHALL_CAUSE);
+	check(manifest?._?.routes?.length > 0, `No server-rendered routes: ${CATCHALL_CAUSE}`);
 }
 
 if (failures.length > 0) {

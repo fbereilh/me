@@ -63,7 +63,9 @@ npm run test:prerender # build, then assert every post ships a real static page
 ```
 
 `scripts/check-prerender.mjs` is the guard against the blog regressing to client-side
-fetch-and-inject, which shipped empty pages to crawlers.
+fetch-and-inject, which shipped empty pages to crawlers. It also fails the build when a post
+ships source listings with no syntax-highlighting stylesheet, and when the adapter-node
+server manifest comes out with no route nodes (see the catch-all note below).
 
 ## Sharp edges
 
