@@ -5,3 +5,7 @@ yarn.lock
 
 # Quarto render output
 static/posts/
+
+# GitHub Actions workflows: pushing a formatting-only change to these needs the
+# `workflow` OAuth scope, which the deploy token does not carry.
+.github/workflows/

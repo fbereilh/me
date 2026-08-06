@@ -2,12 +2,12 @@ name: Render Quarto
 
 on:
   push:
-    branches: [main]
+    branches: [ main ]
     paths:
       - 'nbs/**'
       - '.github/workflows/render-quarto.yml'
   pull_request:
-    branches: [main]
+    branches: [ main ]
     paths:
       - 'nbs/**'
   workflow_dispatch:
@@ -18,7 +18,7 @@ permissions:
 jobs:
   render:
     runs-on: ubuntu-latest
-
+    
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -35,7 +35,7 @@ jobs:
         run: |
           cd nbs
           nbstripout --keep-output --keep-count *.ipynb
-
+          
       - name: Set up Quarto
         uses: quarto-dev/quarto-actions/setup@v2
 
@@ -48,7 +48,7 @@ jobs:
           git config --local user.name "github-actions[bot]"
           git add static/posts/
           git diff --staged --quiet || git commit -m "chore: render notebooks [skip ci]"
-
+          
       - name: Push changes
         uses: ad-m/github-push-action@master
         with:
