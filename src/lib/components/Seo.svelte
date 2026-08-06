@@ -14,10 +14,14 @@
 		description = SITE_DESCRIPTION,
 		image = SITE_IMAGE,
 		type = 'website',
-		canonical = new URL(page.url.pathname, SITE_URL).href,
+		canonical: canonicalOverride,
 		publishedAt,
 		noindex = false
 	}: SeoData = $props();
+
+	// Derived, not a prop fallback: Svelte evaluates fallbacks untracked and caches them, so
+	// the first page of a session would keep claiming its URL across client-side navigation.
+	const canonical = $derived(canonicalOverride ?? new URL(page.url.pathname, SITE_URL).href);
 
 	const absoluteImage = $derived(new URL(image, SITE_URL).href);
 </script>

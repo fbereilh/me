@@ -11,7 +11,7 @@
 import { readFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { parse } from 'node-html-parser';
-import { publishedSlugs, templatePath } from '../src/lib/post-files.js';
+import { placeholderDescription, publishedSlugs } from '../src/lib/post-files.js';
 
 const PRERENDERED = join(process.cwd(), 'build', 'prerendered');
 const failures = [];
@@ -47,16 +47,11 @@ const slugs = publishedSlugs();
 check(slugs.length > 0, 'No published posts found in nbs/ - expected at least one.');
 
 /**
- * The description `scripts/new_post.py` seeds a new notebook with. Read from the template
- * rather than pinned here, so it cannot drift: a post that still carries it never had its
- * blurb written, and that placeholder would ship as the page description, the blog-index
- * card and the RSS item.
+ * The blurb `scripts/new_post.py` seeds a new notebook with, read from the template itself
+ * so it cannot drift. A post still carrying it never had its own written, and it would ship
+ * as the page description, the blog-index card and the RSS item.
  */
-const templateSource = existsSync(templatePath()) ? readFileSync(templatePath(), 'utf-8') : '';
-
-function isPlaceholderDescription(description) {
-	return Boolean(description) && templateSource.includes(description);
-}
+const PLACEHOLDER_DESCRIPTION = placeholderDescription();
 
 for (const slug of slugs) {
 	const page = join(PRERENDERED, 'blog', `${slug}.html`);
@@ -66,13 +61,19 @@ for (const slug of slugs) {
 	}
 
 	const html = readFileSync(page, 'utf-8');
-	const title = html.match(/<title>([\s\S]*?)<\/title>/)?.[1]?.trim();
-	const canonical = html.match(/<link rel="canonical" href="([^"]*)"/)?.[1];
-	const description = html.match(/<meta name="description" content="([^"]*)"/)?.[1]?.trim();
+	// Read the head through the parser, not by regex: attribute values are HTML-escaped, and
+	// a description is only comparable to the template's once the entities are decoded back.
+	const document = parse(html);
+	const title = document.querySelector('title')?.textContent.trim();
+	const canonical = document.querySelector('link[rel="canonical"]')?.getAttribute('href');
+	const description = document
+		.querySelector('meta[name="description"]')
+		?.getAttribute('content')
+		?.trim();
 
 	check(Boolean(title), `${slug}: prerendered page has no <title>`);
 	check(
-		!isPlaceholderDescription(description),
+		!PLACEHOLDER_DESCRIPTION || description !== PLACEHOLDER_DESCRIPTION,
 		`${slug}: still ships the template's placeholder description - write a real one in the notebook frontmatter`
 	);
 	check(
@@ -81,7 +82,7 @@ for (const slug of slugs) {
 	);
 	check(!html.includes('>Loading...<'), `${slug}: prerendered page still ships a loading shell`);
 
-	const body = parse(html).querySelector('.post-content');
+	const body = document.querySelector('.post-content');
 	check(Boolean(body), `${slug}: prerendered page has no .post-content element`);
 	check(
 		Boolean(body?.textContent.trim()),

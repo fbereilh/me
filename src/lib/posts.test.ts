@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { placeholderDescription } from './post-files.js';
 import { getPosts, parseNotebookFrontmatter, sortPosts, toPost, type Post } from './posts';
 
 function notebook(cells: Array<{ cell_type: string; source: string }>): string {
@@ -119,6 +120,19 @@ describe('sortPosts', () => {
 	it('pushes undated posts to the end instead of scrambling the order', () => {
 		const sorted = sortPosts([post('undated', ''), post('april', '2026-04-01')]);
 		expect(sorted.map((p) => p.slug)).toEqual(['april', 'undated']);
+	});
+});
+
+describe('placeholderDescription', () => {
+	it('reads the template blurb the build guard rejects', () => {
+		expect(placeholderDescription()).not.toBe('');
+	});
+
+	it('is what no published post ships', () => {
+		const placeholder = placeholderDescription();
+		for (const post of getPosts()) {
+			expect(post.description).not.toBe(placeholder);
+		}
 	});
 });
 

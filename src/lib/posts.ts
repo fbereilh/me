@@ -1,8 +1,12 @@
 import { readFileSync, statSync } from 'node:fs';
-import { parse as parseYaml } from 'yaml';
-import { notebookPath, publishedSlugs, renderedPostPath } from './post-files.js';
+import {
+	notebookPath,
+	parseNotebookFrontmatter,
+	publishedSlugs,
+	renderedPostPath
+} from './post-files.js';
 
-export { renderedPostPath };
+export { parseNotebookFrontmatter, renderedPostPath };
 
 /**
  * The single source of truth for blog post metadata.
@@ -25,13 +29,7 @@ export interface Post {
 }
 
 /** Raw YAML frontmatter of a post notebook, before normalisation. */
-interface Frontmatter {
-	title?: unknown;
-	description?: unknown;
-	date?: unknown;
-	categories?: unknown;
-	author?: unknown;
-}
+type Frontmatter = NonNullable<ReturnType<typeof parseNotebookFrontmatter>>;
 
 const UNKNOWN_DATE = 'Unknown date';
 
@@ -41,38 +39,6 @@ const dateFormatter = new Intl.DateTimeFormat('en-US', {
 	day: 'numeric',
 	timeZone: 'UTC'
 });
-
-/**
- * Pull the YAML frontmatter out of a notebook.
- *
- * The frontmatter lives in cell 0 as a `---` fenced block. Quarto accepts it in either a
- * markdown or a raw cell, so we accept both. Only the first fenced cell is considered,
- * which is what stops a `categories:` line inside a code cell from leaking in.
- */
-export function parseNotebookFrontmatter(notebookSource: string): Frontmatter | null {
-	let notebook: { cells?: Array<{ cell_type?: string; source?: string | string[] }> };
-	try {
-		notebook = JSON.parse(notebookSource);
-	} catch {
-		return null;
-	}
-
-	for (const cell of notebook.cells ?? []) {
-		if (cell.cell_type !== 'raw' && cell.cell_type !== 'markdown') continue;
-
-		const source = Array.isArray(cell.source) ? cell.source.join('') : (cell.source ?? '');
-		const match = source.match(/^\s*---\r?\n([\s\S]*?)\r?\n---\s*$/);
-		if (!match) continue;
-
-		try {
-			const parsed = parseYaml(match[1]);
-			return parsed && typeof parsed === 'object' ? (parsed as Frontmatter) : null;
-		} catch {
-			return null;
-		}
-	}
-	return null;
-}
 
 const ISO_DATE_ONLY = /^\d{4}-\d{2}-\d{2}$/;
 const HAS_EXPLICIT_ZONE = /(?:Z|[+-]\d{2}:?\d{2})$/i;

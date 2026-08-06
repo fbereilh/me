@@ -1,13 +1,20 @@
-import { existsSync, readdirSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { parse as parseYaml } from 'yaml';
 
 /**
- * Where post files live on disk, and which notebooks count as published.
+ * Where post files live on disk, which notebooks count as published, and how a notebook's
+ * frontmatter is read.
  *
  * Plain JavaScript on purpose: `src/lib/posts.ts` imports it as part of the SvelteKit app,
  * and `scripts/check-prerender.mjs` imports it as a bare node script after the build. The
- * build guard has to check exactly the set of posts the site ships, so both read it here
- * rather than each spelling out the directory layout.
+ * build guard has to check exactly the set of posts the site ships and read frontmatter the
+ * same way the site does, so both read it here rather than each spelling out the rules.
+ */
+
+/**
+ * Raw YAML frontmatter of a post notebook, before normalisation.
+ * @typedef {{ title?: unknown, description?: unknown, date?: unknown, categories?: unknown, author?: unknown }} Frontmatter
  */
 
 const NOTEBOOK_DIR = 'nbs';
@@ -40,6 +47,57 @@ export function renderedPostPath(slug, cwd = process.cwd()) {
  */
 export function templatePath(cwd = process.cwd()) {
 	return join(cwd, NOTEBOOK_DIR, '_template.ipynb');
+}
+
+/**
+ * Pull the YAML frontmatter out of a notebook.
+ *
+ * The frontmatter lives in cell 0 as a `---` fenced block. Quarto accepts it in either a
+ * markdown or a raw cell, so we accept both. Only the first fenced cell is considered,
+ * which is what stops a `categories:` line inside a code cell from leaking in.
+ * @param {string} notebookSource
+ * @returns {Frontmatter | null}
+ */
+export function parseNotebookFrontmatter(notebookSource) {
+	/** @type {{ cells?: Array<{ cell_type?: string, source?: string | string[] }> }} */
+	let notebook;
+	try {
+		notebook = JSON.parse(notebookSource);
+	} catch {
+		return null;
+	}
+
+	for (const cell of notebook.cells ?? []) {
+		if (cell.cell_type !== 'raw' && cell.cell_type !== 'markdown') continue;
+
+		const source = Array.isArray(cell.source) ? cell.source.join('') : (cell.source ?? '');
+		const match = source.match(/^\s*---\r?\n([\s\S]*?)\r?\n---\s*$/);
+		if (!match) continue;
+
+		try {
+			const parsed = parseYaml(match[1]);
+			return parsed && typeof parsed === 'object' ? parsed : null;
+		} catch {
+			return null;
+		}
+	}
+	return null;
+}
+
+/**
+ * The placeholder description `scripts/new_post.py` seeds a new notebook with, or `''` when
+ * the template is missing or carries no description.
+ *
+ * Read from the template rather than pinned anywhere, so it cannot drift: a post that still
+ * carries this exact blurb never had its own written, and the build guard rejects it.
+ * @param {string} [cwd]
+ * @returns {string}
+ */
+export function placeholderDescription(cwd = process.cwd()) {
+	const path = templatePath(cwd);
+	if (!existsSync(path)) return '';
+	const description = parseNotebookFrontmatter(readFileSync(path, 'utf-8'))?.description;
+	return typeof description === 'string' ? description.trim() : '';
 }
 
 /**
