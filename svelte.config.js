@@ -17,10 +17,9 @@ const config = {
 			out: 'build'
 		}),
 		alias: {
-			"@/*": "./src/lib/*",
-		},
-
-	},
+			'@/*': './src/lib/*'
+		}
+	}
 };
 
 export default config;
