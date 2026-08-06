@@ -4,7 +4,10 @@
  *
  * The blog used to fetch and inject post HTML in the browser, so what crawlers and
  * link unfurlers actually received was an empty shell. This check fails the build if
- * that ever comes back.
+ * that ever comes back. On top of that it asserts what a post is only worth shipping
+ * with: its own title, canonical and description (never the template's placeholder), a
+ * non-empty body, a highlighting stylesheet whenever it ships source listings, an entry
+ * in the sitemap and the RSS feed, and a server manifest that can still render a 404.
  *
  * Usage: node scripts/check-prerender.mjs   (after `npm run build`)
  */
