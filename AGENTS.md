@@ -84,11 +84,12 @@ local-only today.
 ## CI
 
 `.github/workflows/render-quarto.yml` is the only workflow. On a push to `main` that touches
-`nbs/**` it strips notebook metadata with `nbstripout --keep-output`, runs `quarto render`,
-and commits whatever changed under `static/posts/` back to the branch as
-`chore: render notebooks [skip ci]`. So a rendered-HTML change you forgot to commit locally
-gets healed on `main`. (It also runs on pull requests touching `nbs/**` or the workflow file
-itself - so a change to the workflow is exercised by its own PR - and on manual dispatch.)
+`nbs/**` or the workflow file itself it strips notebook metadata with
+`nbstripout --keep-output --keep-count`, runs `quarto render`, and commits whatever changed
+under `static/posts/` back to the branch as `chore: render notebooks [skip ci]`. So a
+rendered-HTML change you forgot to commit locally gets healed on `main`. (It also runs on
+pull requests touching those same paths - so a change to the workflow is exercised by its own
+PR - and on manual dispatch.)
 
 On a `pull_request` event the commit and push-back steps are skipped: the run renders and
 uploads the `rendered-docs` artifact, nothing more. A PR is checked out at the hidden merge
