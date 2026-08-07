@@ -10,6 +10,7 @@ on:
     branches: [ main ]
     paths:
       - 'nbs/**'
+      - '.github/workflows/render-quarto.yml'
   workflow_dispatch:
 
 permissions:
@@ -42,18 +43,23 @@ jobs:
       - name: Render Quarto documents
         run: cd nbs && quarto render
 
+      # A pull_request run checks out the hidden merge ref refs/pull/N/merge, which
+      # GitHub refuses to update. So a PR renders to prove the notebooks build, but
+      # never commits or pushes the result back.
       - name: Commit rendered files
+        if: github.event_name != 'pull_request'
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           git add static/posts/
           git diff --staged --quiet || git commit -m "chore: render notebooks [skip ci]"
-          
+
       - name: Push changes
+        if: github.event_name != 'pull_request'
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ github.ref }}
+          branch: ${{ github.ref_name }}
 
       - name: Upload rendered files
         uses: actions/upload-artifact@v4
