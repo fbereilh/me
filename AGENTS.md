@@ -90,6 +90,12 @@ and commits whatever changed under `static/posts/` back to the branch as
 gets healed on `main`. (It also runs on pull requests touching `nbs/**` and on manual
 dispatch.)
 
+On a `pull_request` event the commit and push-back steps are skipped: the run renders and
+uploads the `rendered-docs` artifact, nothing more. A PR is checked out at the hidden merge
+ref `refs/pull/N/merge`, which GitHub refuses to update, so pushing back there fails the whole
+check. Keep any new write-back step behind the same `github.event_name != 'pull_request'`
+guard, and target `github.ref_name` (a branch name) rather than `github.ref`.
+
 This does not contradict the authored-once stance: the workflow renders, it does not execute
 notebook cells, so the outputs saved in the notebook are still exactly what gets published.
 
