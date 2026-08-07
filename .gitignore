@@ -27,3 +27,7 @@ vite.config.ts.timestamp-*
 .quarto/
 **/*.quarto_ipynb
 .venv/
+
+# Agent tooling dropped into the workspace
+.mcp.json
+.cellar/
