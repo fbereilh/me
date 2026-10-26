@@ -1,0 +1,10 @@
+.git
+.github
+node_modules
+build
+.svelte-kit
+.devbox
+.venv
+.quarto
+.ctx*
+**/*.quarto_ipynb
